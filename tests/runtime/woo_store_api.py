@@ -44,7 +44,7 @@ def main():
     assert token_a, 'WooCommerce did not provide a Cart-Token'
     assert not empty_a['items']
 
-    added, _ = request('/cart/add-item', 'POST', {'id': product_id, 'quantity': 1}, token_a)
+    added, _ = request('/cart/add-item', 'POST', {'id': product_id, 'quantity': 1}, token_a, expected=201)
     assert len(added['items']) == 1 and added['items'][0]['quantity'] == 1
     key = added['items'][0]['key']
 

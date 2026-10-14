@@ -195,6 +195,11 @@ class ThemeTests(unittest.TestCase):
         self.assertIn('PHP_VERSION: ${{ matrix.php }}',flow)
         self.assertIn('RUN_BROWSER',runner)
 
+    def test_woo_store_api_expects_created_on_new_cart_item(self):
+        script=(ROOT/'tests/runtime/woo_store_api.py').read_text()
+        self.assertIn('token_a, expected=201)',script)
+        self.assertIn('token_b != token_a',script)
+
     def test_runtime_tests_remain_outside_installable_theme(self):
         for extra in ('tests/runtime/woo_store_api.py','tests/runtime/admin_smoke.py',
                       'tests/runtime/rollback.sh','docs/77-scenarios.json'):
