@@ -151,6 +151,15 @@ class ThemeTests(unittest.TestCase):
         for expected in ('.env','.env.*','*.log','node_modules/','dist/'):
             self.assertIn(expected,ignored)
 
+    def test_ci_actions_use_pinned_node24_versions(self):
+        """Avoid deprecated GitHub Actions Node 20 execution and mutable refs."""
+        for name in ('ci.yml', 'wordpress-runtime.yml'):
+            data=(ROOT/'.github'/'workflows'/name).read_text()
+            self.assertIn('actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd',data)
+            self.assertIn('actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548',data)
+            self.assertNotIn('actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683',data)
+            self.assertNotIn('actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065',data)
+
     def test_runtime_wp_cli_matches_wordpress_permissions(self):
         """Regression: WordPress Debian and WP-CLI Alpine use different UIDs."""
         compose=(ROOT/'tests/runtime/compose.yaml').read_text()
