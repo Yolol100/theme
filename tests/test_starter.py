@@ -44,10 +44,9 @@ class ThemeTests(unittest.TestCase):
         s=(THEME/'style.css').read_text()
         for term in ('Theme Name: Webactueel Starter','Version: 1.0.4','Requires at least: 6.6','Requires PHP: 8.3','Text Domain: webactueel-starter','License: GPL-2.0-or-later'):
             with self.subTest(term=term):self.assertIn(term,s)
-        self.assertIn('overflow-wrap: anywhere', s.split('*/',1)[1])
-        self.assertIn('overflow-x: auto', s.split('*/',1)[1])
+        self.assertEqual(s.split('*/',1)[1].strip(),'')
     def test_theme_long_word_and_table_reflow_guard(self):
-        css=(THEME/'style.css').read_text()
+        css=json.loads((THEME/'theme.json').read_text())['styles']['css']
         self.assertIn('.wp-block-post-content',css)
         self.assertIn('.wp-block-post-title',css)
         self.assertIn('overflow-wrap: anywhere',css)

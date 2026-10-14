@@ -11,15 +11,3 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: webactueel-starter
 Tags: full-site-editing, custom-colors
 */
-
-/* Keep long editor-authored words inside their intended content measure. */
-.wp-block-post-title,
-.wp-block-post-content {
-    overflow-wrap: anywhere;
-}
-
-/* Core table blocks can scroll without widening the whole document. */
-.wp-block-post-content .wp-block-table {
-    max-width: 100%;
-    overflow-x: auto;
-}

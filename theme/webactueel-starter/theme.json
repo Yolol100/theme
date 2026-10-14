@@ -59,7 +59,8 @@
           "text": "var:preset|color|canvas"
         }
       }
-    }
+    },
+    "css": ".wp-block-post-title, .wp-block-post-content { overflow-wrap: anywhere; } .wp-block-post-content .wp-block-table { max-width: 100%; overflow-x: auto; }"
   },
   "templateParts": [
     {

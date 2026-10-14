@@ -50,7 +50,7 @@ artifacts. A missing scenario receipt stays NOT_RUN (or PARTIAL), not PASS.
 
 The former 1.0.3 install ZIP remains historically preserved. The expanded
 mobile test found real horizontal overflow with an unbroken 104-character word
-at 320px. Version 1.0.4 adds a scoped `overflow-wrap: anywhere` rule to
+at 320px. Version 1.0.4 adds a native theme.json `overflow-wrap: anywhere` rule to
 post headings/content and keeps core table blocks within a scrollable container.
 Release 1.0.4 requires a new exact ZIP hash, clean WordPress 6.6/current
 installation, editor, WooCommerce and accessibility reruns on the exact commit.
