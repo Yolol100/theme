@@ -59,6 +59,17 @@
           "text": "var:preset|color|canvas"
         }
       }
+    },
+    "blocks": {
+      "core/post-title": {
+        "css": "overflow-wrap: anywhere;"
+      },
+      "core/post-content": {
+        "css": "overflow-wrap: anywhere;"
+      },
+      "core/table": {
+        "css": "max-width: 100%; overflow-x: auto;"
+      }
     }
   },
   "templateParts": [
