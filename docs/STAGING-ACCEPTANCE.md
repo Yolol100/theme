@@ -37,3 +37,5 @@ Current state is SOURCE + DISPOSABLE-RUNTIME SMOKE GO only. Staging/production G
 requires every applicable independent TH-01..TH-16 gate, all required scenario
 receipts, zero unresolved medium/high/critical findings and owner/QA signoff.
 Keep client details and real account/payment credentials out of public CI.
+
+The disposable `tests/runtime/axe_audit.py` generates **advisory** axe-core findings for representative synthetic WordPress pages; it is not a WCAG-EM sample or human AT review.

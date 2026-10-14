@@ -195,6 +195,24 @@ class ThemeTests(unittest.TestCase):
         self.assertIn('PHP_VERSION: ${{ matrix.php }}',flow)
         self.assertIn('RUN_BROWSER',runner)
 
+    def test_gutenberg_roundtrip_is_real_but_scope_limited(self):
+        admin=(ROOT/'tests/runtime/admin_smoke.py').read_text()
+        run=(ROOT/'tests/runtime/run.sh').read_text()
+        self.assertIn("RUN_EDITOR_E2E=1",run)
+        self.assertIn("editor.savePost()",admin)
+        self.assertIn("page.reload",admin)
+        self.assertIn("Persisted from WordPress block editor",admin)
+        self.assertNotIn('payment-provider credentials',admin)
+
+    def test_axe_results_are_advisory_not_wcag_certification(self):
+        source=(ROOT/'tests/runtime/axe_audit.py').read_text()
+        flow=(ROOT/'.github/workflows/wordpress-runtime.yml').read_text()
+        runner=(ROOT/'tests/runtime/run.sh').read_text()
+        self.assertIn('axe-core@4.10.3',flow)
+        self.assertIn('tests/runtime/axe_audit.py',runner)
+        self.assertIn("'wcag_conformance_claim': False",source)
+        self.assertIn("'human_screenreader_testing': 'NOT_RUN'",source)
+
     def test_woo_store_api_expects_created_on_new_cart_item(self):
         script=(ROOT/'tests/runtime/woo_store_api.py').read_text()
         self.assertIn('token_a, expected=201)',script)
@@ -282,7 +300,7 @@ class ThemeTests(unittest.TestCase):
                      'tests/runtime/browser_smoke.py','tests/runtime/seed_woo.php',
                      'docs/STAGING-ACCEPTANCE.md','docs/77-scenarios.json',
                      'tests/runtime/woo_store_api.py','tests/runtime/admin_smoke.py',
-                     'tests/runtime/rollback.sh'} |
+                     'tests/runtime/rollback.sh','tests/runtime/axe_audit.py'} |
                     {'optional-scaffolding/assets/','optional-scaffolding/patterns/',
                      'optional-scaffolding/styles/'})
                 for info in archive.infolist():

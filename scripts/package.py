@@ -28,6 +28,7 @@ SOURCE_FILES = frozenset({
     'docs/STAGING-ACCEPTANCE.md',
     'docs/77-scenarios.json',
     'tests/runtime/woo_store_api.py',
+    'tests/runtime/axe_audit.py',
     'tests/runtime/admin_smoke.py',
     'tests/runtime/rollback.sh',
     'tests/runtime/compose.yaml', 'tests/runtime/run.sh',

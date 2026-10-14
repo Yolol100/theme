@@ -84,13 +84,20 @@ curl --fail --silent --show-error --location 'http://localhost:8080/?s=Example' 
 
 if [ "$RUN_BROWSER" = 1 ]; then
   BASE_URL=http://localhost:8080 ENABLE_WOO="$ENABLE_WOO" python3 tests/runtime/browser_smoke.py
-  BASE_URL=http://localhost:8080 python3 tests/runtime/admin_smoke.py
+  if [ "$WP_TARGET" = latest ] && [ "${PHP_VERSION:-8.3}" = 8.3 ] && [ "$ENABLE_WOO" = 0 ]; then
+    RUN_EDITOR_E2E=1 EDITOR_TEST_PAGE_ID="$page_id" BASE_URL=http://localhost:8080 python3 tests/runtime/admin_smoke.py
+  else
+    BASE_URL=http://localhost:8080 python3 tests/runtime/admin_smoke.py
+  fi
 fi
 if [ "$ENABLE_WOO" = 1 ]; then
   BASE_URL=http://localhost:8080 python3 tests/runtime/woo_store_api.py
 fi
 if [ "$ENABLE_WOO" = 0 ] && [ "$WP_TARGET" = latest ]; then
   bash tests/runtime/rollback.sh
+fi
+if [ "$ENABLE_WOO" = 0 ] && [ "$WP_TARGET" = latest ] && [ "${PHP_VERSION:-8.3}" = 8.3 ]; then
+  BASE_URL=http://localhost:8080 python3 tests/runtime/axe_audit.py
 fi
 mkdir -p reports
 python3 - <<'PYRECEIPT'

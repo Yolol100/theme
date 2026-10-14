@@ -16,7 +16,7 @@ older universal theme. No ACF, custom WordPress PHP/JS or WooCommerce overrides.
 
 The newer workflow in this repository increases coverage with one package
 artifact per runtime run, PHP 8.4, real content assertions, admin login,
-WooCommerce Store API cart sessions and an isolated database/uploads restore
+WooCommerce Store API cart sessions, an axe-core advisory scan and an isolated database/uploads restore
 exercise. Read the **actual GitHub Actions result on the latest commit** before
 claiming those new tests have passed. A newly committed test is not proof until
 its job has completed successfully.
