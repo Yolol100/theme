@@ -265,12 +265,37 @@ class ThemeTests(unittest.TestCase):
         self.assertIn("'wcag_conformance_claim': False",source)
         self.assertIn("'human_screenreader_testing': 'NOT_RUN'",source)
 
+    def test_site_editor_rest_override_and_restore_guard(self):
+        admin=(ROOT/'tests/runtime/admin_smoke.py').read_text()
+        run=(ROOT/'tests/runtime/run.sh').read_text()
+        for marker in ('test_site_editor_api_roundtrip(page)',
+                       '/wp/v2/template-parts?context=edit',
+                       "'header','footer'", "method:'POST'", "method:'DELETE'",
+                       'customization absent on frontend'):
+            self.assertIn(marker,admin)
+        self.assertIn('RUN_SITE_EDITOR_API',run)
+        self.assertIn('site_editor_template_parts_rest_roundtrip',run)
+        self.assertIn('NOT a visual',admin)
+
+    def test_editor_edge_case_and_theme_switch_coverage_contract(self):
+        admin=(ROOT/'tests/runtime/admin_smoke.py').read_text()
+        runner=(ROOT/'tests/runtime/run.sh').read_text()
+        for marker in ('test_editor_edge_cases(page)', 'core/image', 'core/quote',
+                       "isBlockValid(b.clientId)", "replaceBlocks(",
+                       'CI image with meaningful alternative text'):
+            self.assertIn(marker,admin)
+        for marker in ('ci-empty-page', 'ci-invalid-block', 'wp theme activate',
+                       'wp post get "$page_id" --field=post_content'):
+            self.assertIn(marker,runner)
+
     def test_extended_keyboard_and_reflow_audit(self):
         source=(ROOT/'tests/runtime/axe_audit.py').read_text()
         self.assertIn('keyboard_and_mobile_checks',source)
         self.assertIn('ci-long-content',source)
         self.assertIn("'wcag_conformance_claim': False",source)
         self.assertIn('assert not any(row',source)
+        self.assertIn('focus_returned',source)
+        self.assertIn("'incomplete_rules'",source)
 
     def test_axe_includes_wcag_states_and_keeps_manual_claims_open(self):
         src=(ROOT/'tests/runtime/axe_audit.py').read_text()

@@ -83,3 +83,24 @@ WebKit; WordPress 6.6 now exercises the gated Gutenberg store roundtrip.
 These are automated tests in disposable CI, not manual Safari/Firefox, hosted
 staging, production accessibility or third-party payment evidence. Keep those
 acceptance gates open. Version 1.0.4 remains the previous rollback artifact.
+
+## 15 October 2026: targeted closure of technical evidence gaps
+
+Automated coverage is extended **outside the 12-file theme ZIP**. The isolated
+WordPress browser test now includes Core image alt text, nested quote, an empty
+page, invalid Core paragraph detection and data-store replacement/reload. The
+WordPress 6.6/current editor stores are tested separately from actual UI
+insertion. On the latest non-Woo profile, an authenticated `wp/v2/template-parts`
+REST roundtrip temporarily updates both file-backed header/footer parts, checks
+front-end rendering and removes the database overrides. A real WordPress CLI
+theme switch verifies post content remains intact and returns to this starter.
+Mobile keyboard tests exercise Escape focus return. Axe incomplete-rule IDs are
+reported as unresolved advisory evidence, not passed WCAG success criteria.
+
+**Evidence boundaries:** Gutenberg data-store operations and template-part REST
+writes are automated, browser-authenticated tests, **not human clicks in the Site
+Editor**. Screen-reader comprehension, actual OS/browser zoom, configured CDN,
+real hosting rollback, and third-party sandbox checkout require their own
+independent site/reviewer receipt; see `STAGING-ACCEPTANCE.md`. No pass claim is
+made until the latest run is complete and independently read back. If a new
+runtime test fails, the CI is a valid regression finding and must not be skipped.

@@ -50,6 +50,13 @@ wp option update posts_per_page 5
 wp eval 'for ($i=1; $i<=12; $i++) { wp_insert_post(array("post_title" => "CI Archive Article " . $i, "post_content" => "Synthetic article number " . $i, "post_status" => "publish", "post_type" => "post")); }'
 page_id="$(wp post create --post_type=page --post_title='Starter Page' \
     --post_content='A visible example page for CI testing.' --post_status=publish --porcelain | tr -d '\r')"
+# Separate disposable fixtures so the normal page and Gutenberg roundtrip stay unchanged.
+empty_page_id="$(wp post create --post_type=page --post_name=ci-empty-page \
+    --post_title='CI Empty Page' --post_content='' --post_status=publish --porcelain | tr -d '\r')"
+invalid_page_id="$(wp post create --post_type=page --post_name=ci-invalid-block \
+    --post_title='CI Invalid Block' \
+    --post_content='<!-- wp:paragraph --><div>CI recoverable block content</div><!-- /wp:paragraph -->' \
+    --post_status=publish --porcelain | tr -d '\r')"
 wp option update blogname 'CI-UnbrokenBrand'$(printf 'B%.0s' {1..110})
 # Stress-test long unbroken content, headings and a wide Core table at small widths.
 wp post create --post_type=page --post_name='ci-long-content' --post_title='CI Long Content UnbrokenTitleBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB' \
@@ -97,7 +104,10 @@ curl --fail --silent --show-error --location 'http://localhost:8080/?s=Example' 
 if [ "$RUN_BROWSER" = 1 ]; then
   BASE_URL=http://localhost:8080 ENABLE_WOO="$ENABLE_WOO" python3 tests/runtime/browser_smoke.py
   if [ "${PHP_VERSION:-8.3}" = 8.3 ] && [ "$ENABLE_WOO" = 0 ]; then
-    RUN_EDITOR_E2E=1 EDITOR_TEST_PAGE_ID="$page_id" BASE_URL=http://localhost:8080 python3 tests/runtime/admin_smoke.py
+    RUN_EDITOR_E2E=1 EDITOR_TEST_PAGE_ID="$page_id" \
+      EDITOR_EMPTY_PAGE_ID="$empty_page_id" EDITOR_INVALID_PAGE_ID="$invalid_page_id" \
+      RUN_SITE_EDITOR_API="$([ "$WP_TARGET" = latest ] && echo 1 || echo 0)" \
+      BASE_URL=http://localhost:8080 python3 tests/runtime/admin_smoke.py
   else
     BASE_URL=http://localhost:8080 python3 tests/runtime/admin_smoke.py
   fi
@@ -112,6 +122,23 @@ if [ "$ENABLE_WOO" = 1 ]; then
   fi
 fi
 if [ "$ENABLE_WOO" = 0 ] && [ "$WP_TARGET" = latest ]; then
+  # Theme-switch data preservation is a separate real WP runtime check.
+  # A theme is responsible for presentation, not storing post content.
+  saved="$(wp post get "$page_id" --field=post_content | tr -d '\r')"
+  alternative="$(wp theme list --status=inactive --field=name | awk 'NF {print; exit}')"
+  test -n "$alternative" || { echo 'No fallback WordPress theme to test switch' >&2; exit 1; }
+  wp theme activate "$alternative"
+  [ "$(wp post get "$page_id" --field=post_content | tr -d '\r')" = "$saved" ]
+  wp theme activate webactueel-starter
+  [ "$(wp post get "$page_id" --field=post_content | tr -d '\r')" = "$saved" ]
+  python3 - <<'PYTHEMESWITCH'
+from urllib.request import urlopen
+with urlopen('http://localhost:8080/starter-page/', timeout=30) as response:
+    assert response.status == 200
+    body = response.read().decode('utf-8')
+    assert 'Persisted from WordPress block editor on CI' in body
+PYTHEMESWITCH
+  echo 'PASS: real WordPress theme switch and return preserve Gutenberg post data'
   bash tests/runtime/rollback.sh
 fi
 if [ "$WP_TARGET" = latest ] && [ "${PHP_VERSION:-8.3}" = 8.3 ]; then
@@ -132,6 +159,10 @@ receipt = {
     'external_payment_provider_sandbox': 'NOT_RUN',
     'hosting_restore': 'NOT_RUN',
     'human_site_editor_ui_acceptance': 'NOT_RUN',
+    'gutenberg_store_edge_cases': 'PASS' if os.environ.get('PHP_VERSION', '8.3') == '8.3' and os.environ.get('ENABLE_WOO') == '0' else 'NOT_RUN',
+    'site_editor_template_parts_rest_roundtrip': 'PASS' if os.environ.get('WP_TARGET', 'latest') == 'latest' and os.environ.get('PHP_VERSION', '8.3') == '8.3' and os.environ.get('ENABLE_WOO') == '0' else 'NOT_RUN',
+    'actual_theme_switch_content_preservation': 'PASS' if os.environ.get('WP_TARGET', 'latest') == 'latest' and os.environ.get('ENABLE_WOO') == '0' else 'NOT_RUN',
+    'manual_screenreader_and_browser_zoom': 'NOT_RUN',
 }
 pathlib.Path('reports/test-receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
 print('PASS: evidence receipt', receipt['theme_sha256'])

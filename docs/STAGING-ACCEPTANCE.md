@@ -157,3 +157,23 @@ criteria** before a conformance claim, including failures not listed here.
 Record WCAG-EM sample selection rationale, excluded features, browsers,
 assistive technologies, inconclusive automated rules, defects and retest links.
 Do not equate a clean axe scan with completion of this matrix.
+
+### Evidence separation for the technical gap checks (15 October 2026)
+
+- The CI Gutenberg fixtures use real browser-loaded Core editor data stores, but
+  **not** the human UI commands for inserting blocks, recovering an invalid
+  block, setting image alt text, or editing a header/footer in Site Editor.
+  On staging, perform each action with pointer and keyboard and record separate
+  UI outcome + persisted post/part IDs (no credentials in public logs).
+- Header/footer REST override + delete tests in disposable WordPress show
+  persistence/reversion but do **not** demonstrate that Site Editor Save,
+  navigation-menu UI or Global Styles visual controls work for real editors.
+  Record these separately with administrator and editor permissions.
+- The automated Escape-key focus check is not a human screen-reader result.
+  Record one keyboard-only task log and NVDA/Firefox plus VoiceOver/Safari
+  navigation and checkout task logs using WCAG-EM 2.0; include unresolved
+  axe-core incomplete rules in the evaluator's inspection list.
+- The disposable theme switch and Docker backup do not replace hosting-specific
+  backup/restore, caching, URL/HTTPS behavior, or external test-mode payments.
+  These retain `NOT_RUN`/`BLOCKED` until a specific authorized staging URL,
+  reviewer and private evidence IDs exist.

@@ -35,6 +35,10 @@ def axe_scan(page, path, scope, state='default'):
             for v in result.get('violations', [])
         ],
         'incomplete_count': len(result.get('incomplete', [])),
+        'incomplete_rules': [
+            {'id': r['id'], 'targets': [n.get('target') for n in r.get('nodes', [])][:5]}
+            for r in result.get('incomplete', [])
+        ],
         'passes_count': len(result.get('passes', [])),
     }
 
@@ -59,6 +63,18 @@ def keyboard_and_mobile_checks(page):
     menu.wait_for(state='visible', timeout=12000)
     assert page.locator('.wp-block-navigation__responsive-container-close').first.is_visible()
     open_menu = axe_scan(page, '/', 'theme', 'mobile-menu-open')
+    # Close with keyboard only and verify focus returns to the opener.
+    page.keyboard.press('Escape')
+    page.wait_for_function(
+        "() => !document.querySelector('.wp-block-navigation__responsive-container.is-menu-open')",
+        timeout=12000,
+    )
+    focus_returned=trigger.evaluate('(node) => document.activeElement === node')
+    assert focus_returned, 'Mobile menu Escape did not return focus to its trigger'
+    # Confirm a subsequent keyboard activation still works and the close
+    # button can close without pointer input.
+    page.keyboard.press('Enter')
+    menu.wait_for(state='visible', timeout=12000)
     page.locator('.wp-block-navigation__responsive-container-close').first.focus()
     page.keyboard.press('Enter')
     page.wait_for_function(
@@ -81,7 +97,8 @@ def keyboard_and_mobile_checks(page):
                 screenshot.parent.mkdir(parents=True, exist_ok=True)
                 page.screenshot(path=str(screenshot), full_page=True)
     return {
-        'mobile_keyboard': 'PASS', 'long_content_reflow': 'PASS',
+        'mobile_keyboard': 'PASS', 'focus_return_after_escape': 'PASS',
+        'long_content_reflow': 'PASS',
         'focus_inspection': focus, 'measurements': dimensions,
         'screenreader': 'NOT_RUN', 'real_browser_zoom': 'NOT_RUN',
     }, open_menu

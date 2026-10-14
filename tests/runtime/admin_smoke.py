@@ -52,6 +52,108 @@ def test_editor_role_post(browser):
         context.close()
 
 
+def test_editor_edge_cases(page):
+    # Additional Gutenberg fixtures use the browser-loaded data store.
+    # This is programmatic block recovery, not the UI recovery button.
+    empty_id = os.environ.get('EDITOR_EMPTY_PAGE_ID')
+    invalid_id = os.environ.get('EDITOR_INVALID_PAGE_ID')
+    assert empty_id and empty_id.isdigit() and invalid_id and invalid_id.isdigit()
+    response=page.goto(BASE+'/ci-empty-page/', wait_until='domcontentloaded')
+    assert response and response.status==200
+    assert 'CI Empty Page' in page.locator('main').inner_text()
+    assert page.locator('main .wp-block-post-content').inner_text().strip() == ''
+
+    response=page.goto(BASE+f'/wp-admin/post.php?post={invalid_id}&action=edit',
+                       wait_until='domcontentloaded')
+    assert response and response.status==200
+    page.wait_for_function('''() => Boolean(window.wp && wp.data &&
+        wp.data.select('core/editor')?.getCurrentPostType()==='page' &&
+        wp.data.select('core/block-editor')?.getBlocks()?.length)''', timeout=45000)
+    before=page.evaluate('''() => {
+        const editor=wp.data.select('core/block-editor');
+        const blocks=editor.getBlocks();
+        return blocks.map(b=>({name:b.name,valid:editor.isBlockValid(b.clientId)}));
+    }''')
+    assert any(b['name']=='core/paragraph' and b['valid'] is False for b in before), (
+        f'Invalid serialized Core paragraph was not detected by Gutenberg: {before}'
+    )
+    recovered=page.evaluate('''async () => {
+        const editor=wp.data.select('core/block-editor');
+        const bad=editor.getBlocks().find(b=>b.name==='core/paragraph'
+            && !editor.isBlockValid(b.clientId));
+        if (!bad) throw Error('Expected invalid Core paragraph missing');
+        wp.data.dispatch('core/block-editor').replaceBlocks(
+            bad.clientId,
+            wp.blocks.createBlock('core/paragraph', {content:'CI recoverable block content'})
+        );
+        await wp.data.dispatch('core/editor').savePost();
+        return wp.data.select('core/editor').getCurrentPostId();
+    }''')
+    assert recovered == int(invalid_id), (recovered,invalid_id)
+    page.reload(wait_until='domcontentloaded')
+    page.wait_for_function('''() => Boolean(window.wp && wp.data &&
+        wp.data.select('core/block-editor')?.getBlocks()?.some(b =>
+          b.name==='core/paragraph' &&
+          wp.data.select('core/block-editor').isBlockValid(b.clientId) &&
+          b.attributes.content==='CI recoverable block content'))''', timeout=45000)
+    response=page.goto(BASE+'/ci-invalid-block/', wait_until='domcontentloaded')
+    assert response and response.status==200
+    assert 'CI recoverable block content' in page.locator('main p').inner_text()
+    print('PASS: empty page and genuine Gutenberg invalid-block detection/recovery (store)')
+
+
+def test_site_editor_api_roundtrip(page):
+    # Real authenticated REST calls from the loaded Site Editor, NOT a visual
+    # Site Editor edit. No file changes or persistent theme modifications.
+    page.goto(BASE+'/wp-admin/site-editor.php',wait_until='domcontentloaded')
+    page.wait_for_function("() => Boolean(window.wp && wp.apiFetch && wp.data)",timeout=45000)
+    parts=page.evaluate('''async () => {
+        const rows=await wp.apiFetch({path:'/wp/v2/template-parts?context=edit&per_page=100'});
+        return rows.filter(p => p.theme==='webactueel-starter' &&
+            ['header','footer'].includes(p.slug)).map(p=>({
+                id:p.id,slug:p.slug,source:p.source,
+                original:p.content?.raw
+            }));
+    }''')
+    assert {p['slug'] for p in parts}=={'header','footer'}, f'Incomplete Site Editor parts: {parts}'
+    for part in parts:
+        assert isinstance(part['original'],str) and part['original'].strip(), part
+        marker=f'CI temporary {part["slug"]} override'
+        changed=part['original']+f'\n<!-- wp:paragraph --><p>{marker}</p><!-- /wp:paragraph -->'
+        try:
+            result=page.evaluate('''async ({id,content}) => {
+                const path='/wp/v2/template-parts/'+encodeURIComponent(id);
+                const updated=await wp.apiFetch({path,method:'POST',data:{content}});
+                const fetched=await wp.apiFetch({path:path+'?context=edit'});
+                return {id:updated.id, content:fetched.content?.raw};
+            }''',{'id':part['id'],'content':changed})
+            assert result['id']==part['id'] and marker in result['content'],result
+            response=page.goto(BASE+'/',wait_until='domcontentloaded')
+            assert response and response.status==200
+            region=page.locator(part['slug']).first
+            assert marker in region.inner_text(), f'{part["slug"]} customization absent on frontend'
+        finally:
+            # Delete only the disposable database override. Core restores the
+            # original file-backed part without changing the theme ZIP.
+            page.goto(BASE+'/wp-admin/site-editor.php',wait_until='domcontentloaded')
+            page.wait_for_function("() => Boolean(window.wp && wp.apiFetch)",timeout=45000)
+            restored=page.evaluate('''async (id) => {
+                const path='/wp/v2/template-parts/'+encodeURIComponent(id);
+                const response=await wp.apiFetch({path:path+'?force=true',method:'DELETE'});
+                const baseline=await wp.apiFetch({path:path+'?context=edit'});
+                return {deleted:Boolean(response.deleted), source:baseline.source, content:baseline.content?.raw};
+            }''',part['id'])
+            assert restored['deleted'] and restored['content']==part['original'], (
+                f'Failed to restore original {part["slug"]} theme part: {restored}'
+            )
+            response=page.goto(BASE+'/',wait_until='domcontentloaded')
+            assert response and response.status==200
+            assert marker not in page.locator(part['slug']).inner_text()
+            page.goto(BASE+'/wp-admin/site-editor.php',wait_until='domcontentloaded')
+            page.wait_for_function("() => Boolean(window.wp && wp.apiFetch)",timeout=45000)
+    print('PASS: authenticated Site Editor REST header/footer save/frontend/readback/revert')
+
+
 def main():
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
@@ -130,6 +232,15 @@ def main():
                         }),
                         window.wp.blocks.createBlock('core/list', {}, [
                             window.wp.blocks.createBlock('core/list-item', {content: 'CI List Item'})
+                        ]),
+                        window.wp.blocks.createBlock('core/image', {
+                            url: '/wp-includes/images/w-logo-blue-white-bg.png',
+                            alt: 'CI image with meaningful alternative text'
+                        }),
+                        window.wp.blocks.createBlock('core/quote', {}, [
+                            window.wp.blocks.createBlock('core/paragraph', {
+                                content: 'CI Nested Quote Content'
+                            })
                         ])
                     ]);
                     await editor.savePost();
@@ -150,7 +261,8 @@ def main():
                 assert 'Gutenberg E2E Saved Page' in body
                 assert 'Persisted from WordPress block editor on CI' in body
                 for marker in ('CI Gutenberg Heading', 'CI Column One', 'CI Column Two',
-                               'CI Core Button', 'CI Table First', 'CI Table Second', 'CI List Item'):
+                               'CI Core Button', 'CI Table First', 'CI Table Second',
+                               'CI List Item', 'CI Nested Quote Content'):
                     assert marker in body, f'Missing persisted Gutenberg Core block content: {marker}'
                 assert page.locator('main .wp-block-columns .wp-block-column').count() == 2
                 assert page.locator('main .wp-block-buttons a[href="/"]').count() == 1
@@ -164,8 +276,16 @@ def main():
                 assert 'CI Table First' in table.inner_text(), 'First cell did not survive save/reload'
                 assert 'CI Table Second' in table.inner_text(), 'Second cell did not survive save/reload'
                 assert page.locator('main .wp-block-list li').count() == 1
-                print('PASS: Gutenberg editor store save/reopen and frontend paragraph, heading, columns, button, table and list')
+                assert page.locator('main .wp-block-quote').count() == 1
+                image=page.locator('main .wp-block-image img').first
+                assert image.count() == 1 and image.get_attribute('alt') == (
+                    'CI image with meaningful alternative text'
+                ), 'Gutenberg image alt text was lost during editor roundtrip'
+                print('PASS: Gutenberg store save/reopen, nested quote and image alt text preserved')
+                test_editor_edge_cases(page)
                 test_editor_role_post(browser)
+                if os.environ.get('RUN_SITE_EDITOR_API') == '1':
+                    test_site_editor_api_roundtrip(page)
             else:
                 print('PASS: authenticated admin login and block editor route; save/reopen NOT_RUN')
         finally:
