@@ -52,7 +52,7 @@ def main():
                   runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa'] }
                 })''')
                 violations = [
-                    {'id': v['id'], 'impact': v['impact'], 'affected_nodes': len(v.get('nodes', []))}
+                    {'id': v['id'], 'impact': v['impact'], 'affected_nodes': len(v.get('nodes', [])), 'targets': [n.get('target') for n in v.get('nodes', [])][:5], 'html': [n.get('html', '')[:350] for n in v.get('nodes', [])][:3]}
                     for v in result.get('violations', [])
                 ]
                 summaries.append({'path': path, 'violations': violations,
@@ -68,7 +68,7 @@ def main():
             }, indent=2) + '\n')
             issues = sum(len(x['violations']) for x in summaries)
             print(f'AXE ADVISORY: scanned {len(summaries)} routes; {issues} violations reported; human WCAG-EM still required')
-            assert not any(row['violations'] for row in summaries), 'WCAG automated rule failure on theme pages'
+            assert not any(row['violations'] for row in summaries), f'WCAG automated rule failure on theme pages: {[(row["path"],row["violations"]) for row in summaries if row["violations"]]}'
         finally:
             browser.close()
 
