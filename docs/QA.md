@@ -88,7 +88,7 @@ acceptance gates open. Version 1.0.4 remains the previous rollback artifact.
 
 Automated coverage is extended **outside the 12-file theme ZIP**. The isolated
 WordPress browser test now includes Core image alt text, nested quote, an empty
-page, invalid Core paragraph detection and data-store replacement/reload. The
+page, invalid Core heading detection and data-store replacement/reload. The
 WordPress 6.6/current editor stores are tested separately from actual UI
 insertion. On the latest non-Woo profile, an authenticated `wp/v2/template-parts`
 REST roundtrip temporarily updates both file-backed header/footer parts, checks

@@ -77,17 +77,17 @@ def test_editor_edge_cases(page):
         const blocks=editor.getBlocks();
         return blocks.map(b=>({name:b.name,valid:editor.isBlockValid(b.clientId)}));
     }''')
-    assert any(b['name']=='core/paragraph' and b['valid'] is False for b in before), (
-        f'Invalid serialized Core paragraph was not detected by Gutenberg: {before}'
+    assert any(b['name']=='core/heading' and b['valid'] is False for b in before), (
+        f'Invalid serialized Core heading was not detected by Gutenberg: {before}'
     )
     recovered=page.evaluate('''async () => {
         const editor=wp.data.select('core/block-editor');
-        const bad=editor.getBlocks().find(b=>b.name==='core/paragraph'
+        const bad=editor.getBlocks().find(b=>b.name==='core/heading'
             && !editor.isBlockValid(b.clientId));
         if (!bad) throw Error('Expected invalid Core paragraph missing');
         wp.data.dispatch('core/block-editor').replaceBlocks(
             bad.clientId,
-            wp.blocks.createBlock('core/paragraph', {content:'CI recoverable block content'})
+            wp.blocks.createBlock('core/heading', {level:2, content:'CI recoverable block content'})
         );
         await wp.data.dispatch('core/editor').savePost();
         return wp.data.select('core/editor').getCurrentPostId();
@@ -96,12 +96,12 @@ def test_editor_edge_cases(page):
     page.reload(wait_until='domcontentloaded')
     page.wait_for_function('''() => Boolean(window.wp && wp.data &&
         wp.data.select('core/block-editor')?.getBlocks()?.some(b =>
-          b.name==='core/paragraph' &&
+          b.name==='core/heading' &&
           wp.data.select('core/block-editor').isBlockValid(b.clientId) &&
           b.attributes.content==='CI recoverable block content'))''', timeout=45000)
     response=page.goto(BASE+'/ci-invalid-block/', wait_until='domcontentloaded')
     assert response and response.status==200
-    assert 'CI recoverable block content' in page.locator('main p').inner_text()
+    assert 'CI recoverable block content' in page.locator('main h2').inner_text()
     print('PASS: empty page and genuine Gutenberg invalid-block detection/recovery (store)')
 
 

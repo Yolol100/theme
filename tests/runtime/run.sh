@@ -55,7 +55,7 @@ empty_page_id="$(wp post create --post_type=page --post_name=ci-empty-page \
     --post_title='CI Empty Page' --post_content='' --post_status=publish --porcelain | tr -d '\r')"
 invalid_page_id="$(wp post create --post_type=page --post_name=ci-invalid-block \
     --post_title='CI Invalid Block' \
-    --post_content='<!-- wp:paragraph --><div>CI recoverable block content</div><!-- /wp:paragraph -->' \
+    --post_content='<!-- wp:heading {"level":2} --><h3 class="wp-block-heading">CI recoverable block content</h3><!-- /wp:heading -->' \
     --post_status=publish --porcelain | tr -d '\r')"
 wp option update blogname 'CI-UnbrokenBrand'$(printf 'B%.0s' {1..110})
 # Stress-test long unbroken content, headings and a wide Core table at small widths.
