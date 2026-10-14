@@ -12,7 +12,7 @@ wp() { "${compose[@]}" run --rm -T cli wp "$@"; }
 
 # Use the single archive built by the workflow package job, not a new per-matrix build.
 (cd dist && sha256sum --check SHA256SUMS.txt)
-printf 'RUNTIME_THEME_SHA256=%s\n' "$(sha256sum dist/Webactueel-Block-Starter-1.0.3-STAGING.zip | cut -d' ' -f1)"
+printf 'RUNTIME_THEME_SHA256=%s\n' "$(sha256sum dist/Webactueel-Block-Starter-1.0.4-STAGING.zip | cut -d' ' -f1)"
 "${compose[@]}" up --wait -d database wordpress
 
 # Probe the actual WordPress container instead of repeatedly starting WP-CLI.
@@ -39,7 +39,7 @@ fi
 wp core install --url=http://localhost:8080 --title='Webactueel CI' \
     --admin_user=ci_admin --admin_password='ci-local-only-password' \
     --admin_email=ci@example.test --skip-email
-wp theme install /workspace/dist/Webactueel-Block-Starter-1.0.3-STAGING.zip --activate
+wp theme install /workspace/dist/Webactueel-Block-Starter-1.0.4-STAGING.zip --activate
 wp option update permalink_structure '/%postname%/'
 wp rewrite flush --hard
 post_id="$(wp post create --post_type=post --post_title='Example CI Post' \
@@ -120,7 +120,7 @@ fi
 mkdir -p reports
 python3 - <<'PYRECEIPT'
 import hashlib, json, os, pathlib
-file = pathlib.Path('dist/Webactueel-Block-Starter-1.0.3-STAGING.zip')
+file = pathlib.Path('dist/Webactueel-Block-Starter-1.0.4-STAGING.zip')
 receipt = {
     'scope': 'disposable-ci',
     'theme_sha256': hashlib.sha256(file.read_bytes()).hexdigest(),

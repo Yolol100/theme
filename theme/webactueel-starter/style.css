@@ -3,7 +3,7 @@ Theme Name: Webactueel Starter
 Theme URI: https://webactueel.nl/
 Author: Webactueel
 Description: Minimal native WordPress block-theme foundation. WooCommerce remains optional and supplies its own store functionality.
-Version: 1.0.3
+Version: 1.0.4
 Requires at least: 6.6
 Requires PHP: 8.3
 License: GPL-2.0-or-later
@@ -11,3 +11,15 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: webactueel-starter
 Tags: full-site-editing, custom-colors
 */
+
+/* Keep long editor-authored words inside their intended content measure. */
+.wp-block-post-title,
+.wp-block-post-content {
+    overflow-wrap: anywhere;
+}
+
+/* Core table blocks can scroll without widening the whole document. */
+.wp-block-post-content .wp-block-table {
+    max-width: 100%;
+    overflow-x: auto;
+}

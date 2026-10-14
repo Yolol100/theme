@@ -25,7 +25,7 @@ jobs:
           python3 - <<'PY'
           import zipfile
           from pathlib import Path
-          install = Path('Webactueel-Block-Starter-1.0.3-STAGING.zip')
+          install = Path('Webactueel-Block-Starter-1.0.4-STAGING.zip')
           with zipfile.ZipFile(install) as z:
               assert z.testzip() is None
               assert len(z.namelist()) == 12

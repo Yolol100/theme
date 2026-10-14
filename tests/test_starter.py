@@ -42,9 +42,18 @@ class ThemeTests(unittest.TestCase):
         self.assertEqual(list(THEME.rglob('*.php'))+list(THEME.rglob('*.js')),[])
     def test_theme_header(self):
         s=(THEME/'style.css').read_text()
-        for term in ('Theme Name: Webactueel Starter','Version: 1.0.3','Requires at least: 6.6','Requires PHP: 8.3','Text Domain: webactueel-starter','License: GPL-2.0-or-later'):
+        for term in ('Theme Name: Webactueel Starter','Version: 1.0.4','Requires at least: 6.6','Requires PHP: 8.3','Text Domain: webactueel-starter','License: GPL-2.0-or-later'):
             with self.subTest(term=term):self.assertIn(term,s)
-        self.assertEqual(s.split('*/',1)[1].strip(),'')
+        self.assertIn('overflow-wrap: anywhere', s.split('*/',1)[1])
+        self.assertIn('overflow-x: auto', s.split('*/',1)[1])
+    def test_theme_long_word_and_table_reflow_guard(self):
+        css=(THEME/'style.css').read_text()
+        self.assertIn('.wp-block-post-content',css)
+        self.assertIn('.wp-block-post-title',css)
+        self.assertIn('overflow-wrap: anywhere',css)
+        self.assertIn('max-width: 100%',css)
+        self.assertIn('overflow-x: auto',css)
+
     def test_theme_json_version_tokens_palette(self):
         cfg=json.loads((THEME/'theme.json').read_text())
         self.assertEqual(cfg['version'],3)
@@ -74,10 +83,10 @@ class ThemeTests(unittest.TestCase):
         header=(THEME/'style.css').read_text()
         pack=(ROOT/'scripts'/'package.py').read_text()
         readme=(ROOT/'README.md').read_text()
-        self.assertIn('Version: 1.0.3',header)
-        self.assertIn('Starter-1.0.3-STAGING.zip',pack)
-        self.assertIn('Starter-Source-1.0.3.zip',pack)
-        self.assertIn('Starter-1.0.3-STAGING.zip',readme)
+        self.assertIn('Version: 1.0.4',header)
+        self.assertIn('Starter-1.0.4-STAGING.zip',pack)
+        self.assertIn('Starter-Source-1.0.4.zip',pack)
+        self.assertIn('Starter-1.0.4-STAGING.zip',readme)
 
     def test_block_comment_nesting_and_attrs(self):
         for p in sorted(THEME.rglob('*.html')):
@@ -251,7 +260,7 @@ class ThemeTests(unittest.TestCase):
             (root/'local-notes.txt').write_text('private dummy\n')
             proc=subprocess.run(['python3','scripts/package.py'],cwd=root,capture_output=True,text=True)
             self.assertEqual(proc.returncode,0,proc.stderr)
-            with zipfile.ZipFile(root/'dist'/'Webactueel-Block-Starter-Source-1.0.3.zip') as z:
+            with zipfile.ZipFile(root/'dist'/'Webactueel-Block-Starter-Source-1.0.4.zip') as z:
                 self.assertNotIn('.env',z.namelist())
                 self.assertNotIn('local-notes.txt',z.namelist())
                 self.assertFalse(any('__pycache__' in x or '.pyc' in x for x in z.namelist()))
@@ -275,7 +284,7 @@ class ThemeTests(unittest.TestCase):
             self.assertIn('symlink',proc.stderr.lower())
 
     def test_packager_rejects_symlinked_theme_ancestor(self):
-        # Before 1.0.3, a linked `theme/` ancestor bypassed the leaf checks.
+        # Before 1.0.4, a linked `theme/` ancestor bypassed the leaf checks.
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)/'workspace'
             shutil.copytree(ROOT, root, ignore=shutil.ignore_patterns('dist','__pycache__','*.pyc'))
@@ -286,7 +295,7 @@ class ThemeTests(unittest.TestCase):
             proc=subprocess.run(['python3','scripts/package.py'],cwd=root,capture_output=True,text=True)
             self.assertNotEqual(proc.returncode,0)
             self.assertIn('Symlinked theme path is forbidden',proc.stderr)
-            self.assertFalse((root/'dist'/'Webactueel-Block-Starter-1.0.3-STAGING.zip').exists())
+            self.assertFalse((root/'dist'/'Webactueel-Block-Starter-1.0.4-STAGING.zip').exists())
 
     def test_release_zips_rebuild_byte_exact_without_noise(self):
         # Independent black-box check: compare both archives with the actual
@@ -297,8 +306,8 @@ class ThemeTests(unittest.TestCase):
             command=['python3','scripts/package.py']
             run=subprocess.run(command,cwd=root,capture_output=True,text=True)
             self.assertEqual(run.returncode,0,run.stderr)
-            install=root/'dist'/'Webactueel-Block-Starter-1.0.3-STAGING.zip'
-            source=root/'dist'/'Webactueel-Block-Starter-Source-1.0.3.zip'
+            install=root/'dist'/'Webactueel-Block-Starter-1.0.4-STAGING.zip'
+            source=root/'dist'/'Webactueel-Block-Starter-Source-1.0.4.zip'
             expected_prefix='webactueel-starter/'
             with zipfile.ZipFile(install) as archive:
                 self.assertIsNone(archive.testzip())

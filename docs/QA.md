@@ -44,3 +44,14 @@ Still needs appropriate real-world independent checks:
 See `docs/STAGING-ACCEPTANCE.md` for receipts, review and final approval.
 Never put real credentials, customer data or order information in public Actions
 artifacts. A missing scenario receipt stays NOT_RUN (or PARTIAL), not PASS.
+
+
+## Corrective release 1.0.4: long-content reflow
+
+The former 1.0.3 install ZIP remains historically preserved. The expanded
+mobile test found real horizontal overflow with an unbroken 104-character word
+at 320px. Version 1.0.4 adds a scoped `overflow-wrap: anywhere` rule to
+post headings/content and keeps core table blocks within a scrollable container.
+Release 1.0.4 requires a new exact ZIP hash, clean WordPress 6.6/current
+installation, editor, WooCommerce and accessibility reruns on the exact commit.
+Do not reuse the 1.0.3 ZIP SHA as evidence for 1.0.4.
