@@ -57,6 +57,10 @@ blog_id="$(wp post create --post_type=page --post_title='CI Blog' \
 if [ "$ENABLE_WOO" = 1 ]; then
   wp plugin install woocommerce --activate
   wp eval-file /workspace/seed_woo.php
+  if [ "${PHP_VERSION:-8.3}" = 8.3 ]; then
+    # Built-in cheque is offline: no external payment provider or financial charge.
+    wp option update woocommerce_cheque_settings '{"enabled":"yes","title":"CI offline cheque"}' --format=json
+  fi
   wp option get woocommerce_shop_page_id
   wp option get woocommerce_cart_page_id
   wp option get woocommerce_checkout_page_id
@@ -91,7 +95,13 @@ if [ "$RUN_BROWSER" = 1 ]; then
   fi
 fi
 if [ "$ENABLE_WOO" = 1 ]; then
-  BASE_URL=http://localhost:8080 python3 tests/runtime/woo_store_api.py
+  if [ "${PHP_VERSION:-8.3}" = 8.3 ]; then
+    RUN_OFFLINE_ORDER=1 BASE_URL=http://localhost:8080 python3 tests/runtime/woo_store_api.py
+    # Inspect the generated order through WooCommerce CRUD (supports HPOS).
+    wp eval '$orders=wc_get_orders(array("limit"=>10,"status"=>"on-hold")); if (!count($orders)) WP_CLI::error("Offline test order absent"); $order=$orders[0]; if ($order->get_payment_method()!=="cheque") WP_CLI::error("Unexpected test gateway"); WP_CLI::success("Synthetic offline Woo order verified");'
+  else
+    BASE_URL=http://localhost:8080 python3 tests/runtime/woo_store_api.py
+  fi
 fi
 if [ "$ENABLE_WOO" = 0 ] && [ "$WP_TARGET" = latest ]; then
   bash tests/runtime/rollback.sh

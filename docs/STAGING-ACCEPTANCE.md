@@ -39,3 +39,5 @@ receipts, zero unresolved medium/high/critical findings and owner/QA signoff.
 Keep client details and real account/payment credentials out of public CI.
 
 The disposable `tests/runtime/axe_audit.py` generates **advisory** axe-core findings for representative synthetic WordPress pages; it is not a WCAG-EM sample or human AT review.
+
+CI also exercises the built-in **cheque/offline** method with fully synthetic data, solely in an isolated database. This is not a payment-provider sandbox test or proof that real payment, tax and shipping extensions work.

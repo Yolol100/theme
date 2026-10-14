@@ -6,6 +6,8 @@ if ( ! class_exists( 'WC_Product_Simple' ) ) {
 $product = new WC_Product_Simple();
 $product->set_name( 'CI Test Product' );
 $product->set_regular_price( '12.50' );
+// Avoid carrier/shipping integrations in the isolated offline checkout fixture.
+$product->set_virtual( true );
 $product->set_status( 'publish' );
 $product->set_manage_stock( true );
 $product->set_stock_quantity( 7 );

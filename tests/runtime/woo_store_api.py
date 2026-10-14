@@ -64,6 +64,44 @@ def main():
     assert not again['items']
 
     # Do not test an actual payment gateway or create an order in public CI.
+    if os.environ.get('RUN_OFFLINE_ORDER') == '1':
+        # A new synthetic cart, deliberately using WooCommerce's offline cheque
+        # gateway. This creates an isolated on-hold order, never charges money.
+        empty_c, headers_c = request('/cart')
+        token_c = headers_c.get('Cart-Token')
+        assert token_c and not empty_c['items']
+        checkout_cart, _ = request('/cart/add-item', 'POST',
+                                   {'id': product_id, 'quantity': 1}, token_c, expected=201)
+        assert checkout_cart['items'][0]['quantity'] == 1
+        billing = {
+            'first_name': 'Synthetic', 'last_name': 'CI', 'company': '',
+            'address_1': '1 Test Street', 'address_2': '', 'city': 'Amsterdam',
+            'state': '', 'postcode': '1012JS', 'country': 'NL',
+            'email': 'synthetic-buyer@example.test', 'phone': '0000000000',
+        }
+        shipping = {key: value for key, value in billing.items() if key != 'email'}
+        order, _ = request('/checkout', 'POST', {
+            'billing_address': billing,
+            'shipping_address': shipping,
+            'payment_method': 'cheque',
+            'payment_data': [],
+            'customer_note': 'Disposable offline CI checkout; no money',
+            'create_account': False,
+        }, token_c)
+        assert int(order['order_id']) > 0
+        assert order['payment_method'] == 'cheque', order
+        assert order['status'] == 'on-hold', order
+        from pathlib import Path
+        report = Path('reports/woo-offline-order.json')
+        report.parent.mkdir(parents=True, exist_ok=True)
+        report.write_text(json.dumps({
+            'scope': 'isolated-synthetic-offline-only',
+            'payment_method': 'cheque',
+            'real_payment_processed': False,
+            'order_status': order['status'],
+            'order_id': order['order_id'],
+        }, indent=2) + '\n')
+        print('PASS: disposable offline cheque checkout order and on-hold status')
     print('PASS: WooCommerce public Store API, cart tokens, quantities, removal and guest isolation')
 
 

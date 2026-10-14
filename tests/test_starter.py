@@ -195,6 +195,17 @@ class ThemeTests(unittest.TestCase):
         self.assertIn('PHP_VERSION: ${{ matrix.php }}',flow)
         self.assertIn('RUN_BROWSER',runner)
 
+    def test_checkout_never_uses_real_payment_gateways(self):
+        woo=(ROOT/'tests/runtime/woo_store_api.py').read_text()
+        runner=(ROOT/'tests/runtime/run.sh').read_text()
+        fixture=(ROOT/'tests/runtime/seed_woo.php').read_text()
+        self.assertIn("'payment_method': 'cheque'",woo)
+        self.assertIn("'real_payment_processed': False",woo)
+        self.assertIn('woocommerce_cheque_settings',runner)
+        self.assertIn('wc_get_orders',runner)
+        self.assertIn('set_virtual( true )',fixture)
+        self.assertNotIn("'payment_method': 'stripe'",woo)
+
     def test_gutenberg_roundtrip_is_real_but_scope_limited(self):
         admin=(ROOT/'tests/runtime/admin_smoke.py').read_text()
         run=(ROOT/'tests/runtime/run.sh').read_text()
