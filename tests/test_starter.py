@@ -45,6 +45,13 @@ class ThemeTests(unittest.TestCase):
         for term in ('Theme Name: Webactueel Starter','Version: 1.0.4','Requires at least: 6.6','Requires PHP: 8.3','Text Domain: webactueel-starter','License: GPL-2.0-or-later'):
             with self.subTest(term=term):self.assertIn(term,s)
         self.assertEqual(s.split('*/',1)[1].strip(),'')
+    def test_navigation_list_semantics_no_empty_fallback(self):
+        markup=(THEME/'parts/header.html').read_text()
+        self.assertIn('<!-- wp:navigation {"overlayMenu":"mobile"} -->',markup)
+        self.assertIn('<!-- wp:home-link {"label":"Home"} /-->',markup)
+        self.assertIn('<!-- /wp:navigation -->',markup)
+        self.assertNotIn('<!-- wp:navigation {"overlayMenu":"mobile"} /-->',markup)
+
     def test_theme_long_word_and_table_reflow_guard(self):
         css=json.loads((THEME/'theme.json').read_text())['styles']['css']
         self.assertIn('.wp-block-post-content',css)

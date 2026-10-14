@@ -55,3 +55,5 @@ post headings/content and keeps core table blocks within a scrollable container.
 Release 1.0.4 requires a new exact ZIP hash, clean WordPress 6.6/current
 installation, editor, WooCommerce and accessibility reruns on the exact commit.
 Do not reuse the 1.0.3 ZIP SHA as evidence for 1.0.4.
+
+The accessibility test also reproduced an axe WCAG 1.3.1 `list` finding in the empty Navigation block fallback. The header now uses a native `core/home-link` block as an actual `core/navigation` child. Regression tests require the correct block nesting; the theme remains editor-customizable and does not hard-code a site URL.
