@@ -57,3 +57,15 @@ installation, editor, WooCommerce and accessibility reruns on the exact commit.
 Do not reuse the 1.0.3 ZIP SHA as evidence for 1.0.4.
 
 The accessibility test also reproduced an axe WCAG 1.3.1 `list` finding in the empty Navigation block fallback. The header now uses a native `core/home-link` block as an actual `core/navigation` child. Regression tests require the correct block nesting; the theme remains editor-customizable and does not hard-code a site URL.
+
+## 15 October 2026: expanded tests and external acceptance boundaries
+
+The runtime matrix now exercises further native Gutenberg Core blocks and an
+authenticated Site Editor page visit, seven widths for long content, a focusable
+mobile navigation overlay state, and supplemental WooCommerce accessibility
+routes. Reports retain individual violations, incomplete axe checks and a
+synthetic 320px screenshot. A browser-loaded data-store block insert is **not**
+a human UI edit. Passing synthetic checkout with `cheque` is **not** a payment
+provider sandbox. Restoring a temporary Docker database and uploads is **not**
+hosting rollback. The six missing target/human gates and safe sign-off process
+are specified in `docs/STAGING-ACCEPTANCE.md` and the unapproved receipt example.

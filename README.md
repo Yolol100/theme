@@ -43,6 +43,10 @@ never add backend or payment code to the theme ZIP.
 - Every build must verify its own `dist/SHA256SUMS.txt` and link to its commit/run.
 - Installable filename: `Webactueel-Block-Starter-1.0.4-STAGING.zip`.
 - See `docs/QA.md`, `docs/77-scenarios.json`, and `docs/STAGING-ACCEPTANCE.md`.
+- Human WCAG-EM 2.0, a real payment-provider sandbox and hosting rollback
+  require a *separate actual staging environment and reviewer*. Use the
+  fail-closed example receipt `docs/staging-acceptance.example.json` and
+  validator `scripts/validate_staging_acceptance.py`; CI cannot certify them.
 - A green GitHub Actions run validates only the assertions actually executed.
   It is **not** a WCAG 2.2 AA certificate, real-money checkout test, hosting
   performance score, or permission to deploy to a client site.

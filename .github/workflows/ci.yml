@@ -32,6 +32,19 @@ jobs:
               assert all(name.startswith('webactueel-starter/') for name in z.namelist())
           print('Release ZIP verification PASS')
           PY
+      - name: Prove external acceptance cannot pass from CI alone
+        run: |
+          python3 scripts/validate_staging_acceptance.py \
+            docs/staging-acceptance.example.json \
+            --zip dist/Webactueel-Block-Starter-1.0.4-STAGING.zip > /tmp/staging-gate.json
+          python3 - <<'PYBLOCK'
+          import json
+          result = json.load(open('/tmp/staging-gate.json', encoding='utf-8'))
+          assert result['status'] == 'NO_GO', result
+          assert not result['production_go_certified'], result
+          assert len(result['open_gates']) == 6, result
+          print('PASS: all real staging/human/payment/hosting acceptance gates remain unapproved')
+          PYBLOCK
       - name: Preserve tested release archives
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0, node24
         with:

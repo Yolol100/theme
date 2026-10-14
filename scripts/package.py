@@ -27,6 +27,8 @@ SOURCE_FILES = frozenset({
     '.github/workflows/wordpress-runtime.yml',
     'docs/STAGING-ACCEPTANCE.md',
     'docs/77-scenarios.json',
+    'docs/staging-acceptance.example.json',
+    'scripts/validate_staging_acceptance.py', 'tests/test_staging_acceptance.py',
     'tests/runtime/woo_store_api.py',
     'tests/runtime/axe_audit.py',
     'tests/runtime/admin_smoke.py',

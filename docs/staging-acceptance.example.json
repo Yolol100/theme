@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "staging_url": "",
+  "artifact": {
+    "commit_sha": "",
+    "theme_sha256": "ac880c7b65c95b30d0b24429172476bc32f1173c86ab46a3154fa1bb5e0a9550"
+  },
+  "gates": {
+    "gutenberg_ui": {"status": "NOT_RUN"},
+    "wcag_em": {"status": "NOT_RUN", "methodology": "WCAG-EM 2.0", "target": "WCAG 2.2 AA"},
+    "responsive_devices": {"status": "NOT_RUN"},
+    "payment_sandbox": {"status": "NOT_RUN", "real_money_moved": false},
+    "hosting_rollback": {"status": "NOT_RUN"},
+    "owner_signoff": {"status": "NOT_RUN"}
+  }
+}

@@ -240,7 +240,8 @@ class ThemeTests(unittest.TestCase):
         self.assertIn("editor.savePost()",admin)
         self.assertIn("page.reload",admin)
         self.assertIn("Persisted from WordPress block editor",admin)
-        for block in ('core/heading', 'core/columns', 'core/column', 'core/buttons', 'core/button'):
+        for block in ('core/heading', 'core/columns', 'core/column', 'core/buttons', 'core/button',
+                      'core/table', 'core/list', 'core/list-item'):
             self.assertIn(block,admin)
         self.assertIn('getBlocks()',admin)
         self.assertNotIn('payment-provider credentials',admin)
@@ -260,6 +261,23 @@ class ThemeTests(unittest.TestCase):
         self.assertIn('ci-long-content',source)
         self.assertIn("'wcag_conformance_claim': False",source)
         self.assertIn('assert not any(row',source)
+
+    def test_axe_includes_wcag_states_and_keeps_manual_claims_open(self):
+        src=(ROOT/'tests/runtime/axe_audit.py').read_text()
+        for token in ('mobile-menu-open', 'woocommerce-integration', 'incomplete_count',
+                      'human_screenreader_testing', 'real_browser_zoom',
+                      '320, 375, 390, 768, 1024, 1440, 1920'):
+            self.assertIn(token, src)
+        self.assertIn("if row['scope'] == 'theme'",src)
+        self.assertIn('wcag_conformance_claim',src)
+
+    def test_staging_acceptance_is_not_in_theme(self):
+        source=(ROOT/'scripts/package.py').read_text()
+        for path in ('scripts/validate_staging_acceptance.py',
+                     'docs/staging-acceptance.example.json',
+                     'tests/test_staging_acceptance.py'):
+            self.assertIn(path, source)
+        self.assertNotIn('hosting_restore_passed', (ROOT/'theme/webactueel-starter/theme.json').read_text())
 
     def test_woo_store_api_expects_created_on_new_cart_item(self):
         script=(ROOT/'tests/runtime/woo_store_api.py').read_text()
@@ -347,6 +365,8 @@ class ThemeTests(unittest.TestCase):
                      'tests/runtime/compose.yaml','tests/runtime/run.sh',
                      'tests/runtime/browser_smoke.py','tests/runtime/seed_woo.php',
                      'docs/STAGING-ACCEPTANCE.md','docs/77-scenarios.json',
+                     'docs/staging-acceptance.example.json',
+                     'scripts/validate_staging_acceptance.py','tests/test_staging_acceptance.py',
                      'tests/runtime/woo_store_api.py','tests/runtime/admin_smoke.py',
                      'tests/runtime/rollback.sh','tests/runtime/axe_audit.py'} |
                     {'optional-scaffolding/assets/','optional-scaffolding/patterns/',

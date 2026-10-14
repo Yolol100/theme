@@ -128,6 +128,10 @@ receipt = {
     'php_target': os.environ.get('PHP_VERSION', '8.3'),
     'woocommerce_enabled': os.environ.get('ENABLE_WOO') == '1',
     'payments_or_wcag_certified': False,
+    'human_wcag_em': 'NOT_RUN',
+    'external_payment_provider_sandbox': 'NOT_RUN',
+    'hosting_restore': 'NOT_RUN',
+    'human_site_editor_ui_acceptance': 'NOT_RUN',
 }
 pathlib.Path('reports/test-receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
 print('PASS: evidence receipt', receipt['theme_sha256'])
