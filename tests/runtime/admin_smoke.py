@@ -11,6 +11,42 @@ BASE = os.environ.get('BASE_URL', 'http://localhost:8080').rstrip('/')
 PASSWORD = os.environ.get('CI_WP_PASSWORD', 'ci-local-only-password')
 
 
+
+def test_editor_role_post(browser):
+    """Editor can publish and reopen posts but cannot enter Site Editor."""
+    context=browser.new_context()
+    page=context.new_page()
+    try:
+        page.goto(BASE+'/wp-login.php',wait_until='domcontentloaded')
+        page.locator('#user_login').fill('ci_editor')
+        page.locator('#user_pass').fill(os.environ.get('CI_EDITOR_PASSWORD','ci-editor-disposable-password'))
+        page.locator('#wp-submit').click()
+        page.wait_for_url('**/wp-admin/**',timeout=25000)
+        response=page.goto(BASE+'/wp-admin/post-new.php',wait_until='domcontentloaded')
+        assert response and response.status==200
+        page.wait_for_function("() => Boolean(window.wp && wp.data && wp.data.select('core/editor')?.getCurrentPostType()==='post')",timeout=45000)
+        created=page.evaluate("""async () => {
+          const editor=wp.data.dispatch('core/editor');
+          editor.editPost({title:'CI Editor Role Post',status:'publish'});
+          wp.data.dispatch('core/block-editor').insertBlocks(
+            wp.blocks.createBlock('core/paragraph',{content:'Editor role persisted content'}));
+          await editor.savePost();
+          return {id:wp.data.select('core/editor').getCurrentPostId(),
+            status:wp.data.select('core/editor').getEditedPostAttribute('status')};
+        }""")
+        assert created['id']>0 and created['status']=='publish',created
+        page.goto(BASE+'/wp-admin/post.php?post='+str(created['id'])+'&action=edit',wait_until='domcontentloaded')
+        page.wait_for_function("() => Boolean(window.wp && wp.data && wp.data.select('core/editor')?.getEditedPostAttribute('title')==='CI Editor Role Post')",timeout=45000)
+        response=page.goto(BASE+'/?p='+str(created['id']),wait_until='domcontentloaded')
+        assert response and response.status==200
+        assert 'Editor role persisted content' in page.locator('main').inner_text()
+        response=page.goto(BASE+'/wp-admin/site-editor.php',wait_until='domcontentloaded')
+        assert response and ('site-editor.php' not in page.url or 'not allowed' in page.locator('body').inner_text().lower())
+        print('PASS: editor user role publishes and reopens post; Site Editor access denied')
+    finally:
+        context.close()
+
+
 def main():
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
@@ -65,6 +101,7 @@ def main():
                 assert 'Gutenberg E2E Saved Page' in body
                 assert 'Persisted from WordPress block editor on CI' in body
                 print('PASS: Gutenberg editor store save/reopen and frontend content roundtrip')
+                test_editor_role_post(browser)
             else:
                 print('PASS: authenticated admin login and block editor route; save/reopen NOT_RUN')
         finally:
