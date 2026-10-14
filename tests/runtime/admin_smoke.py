@@ -80,25 +80,48 @@ def test_editor_edge_cases(page):
     assert any(b['name']=='core/heading' and b['valid'] is False for b in before), (
         f'Invalid serialized Core heading was not detected by Gutenberg: {before}'
     )
-    recovered=page.evaluate('''async () => {
+    # Replace the invalid Core block and allow the editor store to observe it
+    # before issuing Save. Calling savePost in the same JS tick as replaceBlocks
+    # can capture the old invalid serialization on some WordPress versions.
+    recovered=page.evaluate('''() => {
         const editor=wp.data.select('core/block-editor');
         const bad=editor.getBlocks().find(b=>b.name==='core/heading'
             && !editor.isBlockValid(b.clientId));
-        if (!bad) throw Error('Expected invalid Core paragraph missing');
+        if (!bad) throw Error('Expected invalid Core heading missing');
         wp.data.dispatch('core/block-editor').replaceBlocks(
             bad.clientId,
             wp.blocks.createBlock('core/heading', {level:2, content:'CI recoverable block content'})
         );
-        await wp.data.dispatch('core/editor').savePost();
         return wp.data.select('core/editor').getCurrentPostId();
     }''')
     assert recovered == int(invalid_id), (recovered,invalid_id)
+    page.wait_for_function('''() => {
+        const store=wp.data.select('core/block-editor');
+        return store.getBlocks().some(b => b.name==='core/heading' &&
+            store.isBlockValid(b.clientId) &&
+            String(b.attributes.content??'').includes('CI recoverable block content'));
+    }''', timeout=15000)
+    page.evaluate("async () => await wp.data.dispatch('core/editor').savePost()")
+    page.wait_for_function('''() => {
+        const editor=wp.data.select('core/editor');
+        return !editor.isSavingPost() && !editor.isEditedPostDirty();
+    }''', timeout=45000)
+    # Reopen the editor in a new navigation; require the recovered Core block
+    # to be parsed as valid again, not just visible in the previous store.
     page.reload(wait_until='domcontentloaded')
     page.wait_for_function('''() => Boolean(window.wp && wp.data &&
-        wp.data.select('core/block-editor')?.getBlocks()?.some(b =>
-          b.name==='core/heading' &&
-          wp.data.select('core/block-editor').isBlockValid(b.clientId) &&
-          b.attributes.content==='CI recoverable block content'))''', timeout=45000)
+        wp.data.select('core/editor')?.getCurrentPostId() &&
+        wp.data.select('core/block-editor')?.getBlocks()?.length)''',timeout=45000)
+    state=page.evaluate('''() => {
+        const store=wp.data.select('core/block-editor');
+        return store.getBlocks().map(b => ({name:b.name,
+            valid:store.isBlockValid(b.clientId),
+            content:String(b.attributes.content??'')}));
+    }''')
+    assert any(b['name']=='core/heading' and b['valid'] is True and
+               'CI recoverable block content' in b['content'] for b in state), (
+        f'Gutenberg recovery did not survive save/reopen: {state}'
+    )
     response=page.goto(BASE+'/ci-invalid-block/', wait_until='domcontentloaded')
     assert response and response.status==200
     assert 'CI recoverable block content' in page.locator('main h2').inner_text()
