@@ -28,18 +28,23 @@ def test_editor_role_post(browser):
         created=page.evaluate("""async () => {
           const editor=wp.data.dispatch('core/editor');
           editor.editPost({title:'CI Editor Role Post',status:'publish'});
-          wp.data.dispatch('core/block-editor').insertBlocks(
-            wp.blocks.createBlock('core/paragraph',{content:'Editor role persisted content'}));
+          wp.data.dispatch('core/block-editor').insertBlocks([
+            wp.blocks.createBlock('core/heading',{level:2,content:'CI Editor Heading'}),
+            wp.blocks.createBlock('core/paragraph',{content:'Editor role persisted content'})
+          ]);
           await editor.savePost();
           return {id:wp.data.select('core/editor').getCurrentPostId(),
             status:wp.data.select('core/editor').getEditedPostAttribute('status')};
         }""")
         assert created['id']>0 and created['status']=='publish',created
         page.goto(BASE+'/wp-admin/post.php?post='+str(created['id'])+'&action=edit',wait_until='domcontentloaded')
-        page.wait_for_function("() => Boolean(window.wp && wp.data && wp.data.select('core/editor')?.getEditedPostAttribute('title')==='CI Editor Role Post')",timeout=45000)
+        page.wait_for_function("""() => Boolean(window.wp && wp.data &&
+            wp.data.select('core/editor')?.getEditedPostAttribute('title')==='CI Editor Role Post' &&
+            wp.data.select('core/block-editor')?.getBlocks()?.some(block => block.name === 'core/heading'))""",timeout=45000)
         response=page.goto(BASE+'/?p='+str(created['id']),wait_until='domcontentloaded')
         assert response and response.status==200
         assert 'Editor role persisted content' in page.locator('main').inner_text()
+        assert 'CI Editor Heading' in page.locator('main h2').inner_text()
         response=page.goto(BASE+'/wp-admin/site-editor.php',wait_until='domcontentloaded')
         assert response and ('site-editor.php' not in page.url or 'not allowed' in page.locator('body').inner_text().lower())
         print('PASS: editor user role publishes and reopens post; Site Editor access denied')
@@ -83,9 +88,25 @@ def main():
                     const editor = window.wp.data.dispatch('core/editor');
                     const blocks = window.wp.data.dispatch('core/block-editor');
                     editor.editPost({title: 'Gutenberg E2E Saved Page'});
-                    blocks.insertBlocks(window.wp.blocks.createBlock('core/paragraph', {
-                        content: 'Persisted from WordPress block editor on CI'
-                    }));
+                    blocks.insertBlocks([
+                        window.wp.blocks.createBlock('core/paragraph', {
+                            content: 'Persisted from WordPress block editor on CI'
+                        }),
+                        window.wp.blocks.createBlock('core/heading', {
+                            level: 2, content: 'CI Gutenberg Heading'
+                        }),
+                        window.wp.blocks.createBlock('core/columns', {}, [
+                            window.wp.blocks.createBlock('core/column', {}, [
+                                window.wp.blocks.createBlock('core/paragraph', {content: 'CI Column One'})
+                            ]),
+                            window.wp.blocks.createBlock('core/column', {}, [
+                                window.wp.blocks.createBlock('core/paragraph', {content: 'CI Column Two'})
+                            ])
+                        ]),
+                        window.wp.blocks.createBlock('core/buttons', {}, [
+                            window.wp.blocks.createBlock('core/button', {text: 'CI Core Button', url: '/'})
+                        ])
+                    ]);
                     await editor.savePost();
                 }''')
                 page.reload(wait_until='domcontentloaded')
@@ -95,12 +116,18 @@ def main():
                     'wp.data.select("core/editor").getEditedPostAttribute("title") === '
                     '"Gutenberg E2E Saved Page")', timeout=45000,
                 )
+                page.wait_for_function('''() => Boolean(window.wp && wp.data &&
+                    wp.data.select('core/block-editor')?.getBlocks()?.some(block => block.name === 'core/columns'))''', timeout=45000)
                 response = page.goto(BASE + '/starter-page/', wait_until='domcontentloaded')
                 assert response and response.status == 200
                 body = page.locator('main').inner_text()
                 assert 'Gutenberg E2E Saved Page' in body
                 assert 'Persisted from WordPress block editor on CI' in body
-                print('PASS: Gutenberg editor store save/reopen and frontend content roundtrip')
+                for marker in ('CI Gutenberg Heading', 'CI Column One', 'CI Column Two', 'CI Core Button'):
+                    assert marker in body, f'Missing persisted Gutenberg Core block content: {marker}'
+                assert page.locator('main .wp-block-columns .wp-block-column').count() == 2
+                assert page.locator('main .wp-block-buttons a[href="/"]').count() == 1
+                print('PASS: Gutenberg editor store save/reopen and frontend paragraph, heading, columns and button')
                 test_editor_role_post(browser)
             else:
                 print('PASS: authenticated admin login and block editor route; save/reopen NOT_RUN')

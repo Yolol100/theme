@@ -52,6 +52,18 @@ class ThemeTests(unittest.TestCase):
         self.assertIn('<!-- /wp:navigation -->',markup)
         self.assertNotIn('<!-- wp:navigation {"overlayMenu":"mobile"} /-->',markup)
 
+    def test_all_viewports_and_rendered_theme_json_css_are_checked(self):
+        browser=(ROOT/'tests/runtime/browser_smoke.py').read_text()
+        fixture=(ROOT/'tests/runtime/run.sh').read_text()
+        for token in ('320, 375, 390, 768, 1024, 1440, 1920',
+                      "'/ci-long-content/'", 'getComputedStyle(title).overflowWrap',
+                      'getComputedStyle(content).overflowWrap',
+                      'getComputedStyle(table).overflowX'):
+            self.assertIn(token,browser)
+        self.assertIn('UnbrokenTitle',fixture)
+        self.assertIn('UnbrokenHeading',fixture)
+        self.assertIn("assert 'UnbrokenWord'",browser)
+
     def test_theme_long_word_and_table_reflow_guard(self):
         css=json.loads((THEME/'theme.json').read_text())['styles']['css']
         self.assertIn('.wp-block-post-content',css)
@@ -228,6 +240,9 @@ class ThemeTests(unittest.TestCase):
         self.assertIn("editor.savePost()",admin)
         self.assertIn("page.reload",admin)
         self.assertIn("Persisted from WordPress block editor",admin)
+        for block in ('core/heading', 'core/columns', 'core/column', 'core/buttons', 'core/button'):
+            self.assertIn(block,admin)
+        self.assertIn('getBlocks()',admin)
         self.assertNotIn('payment-provider credentials',admin)
 
     def test_axe_results_are_advisory_not_wcag_certification(self):

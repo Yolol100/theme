@@ -49,13 +49,43 @@ def main():
                 for path in ('/shop/', '/cart/', '/checkout/', '/product/ci-test-product/'):
                     verify(page, path)
                 verify(page, '/product/ci-test-product/', includes=('CI Test Product',))
+            # Check the full content fixture, not only the empty-ish homepage.
+            # A table may scroll internally; the document itself must never grow.
+            paths = ('/', '/starter-page/', '/example-ci-post/', '/ci-long-content/')
+            if WOO:
+                paths += ('/shop/', '/cart/', '/checkout/', '/product/ci-test-product/')
             for width in (320, 375, 390, 768, 1024, 1440, 1920):
                 page.set_viewport_size({'width': width, 'height': 850})
-                verify(page, '/')
-                overflow = page.evaluate('document.documentElement.scrollWidth > window.innerWidth + 2')
-                assert not overflow, f'Horizontal overflow at {width}px'
+                for path in paths:
+                    verify(page, path)
+                    dimensions = page.evaluate("""() => ({
+                        viewport: window.innerWidth,
+                        document: document.documentElement.scrollWidth
+                    })""")
+                    assert dimensions['document'] <= dimensions['viewport'] + 2, (
+                        f'Horizontal document overflow: {width}px {path} {dimensions}'
+                    )
+                    if path == '/ci-long-content/':
+                        # Computed CSS proves the theme.json rule is active on
+                        # the rendered frontend, rather than only in a file.
+                        styles = page.evaluate("""() => {
+                            const title = document.querySelector('.wp-block-post-title');
+                            const content = document.querySelector('.wp-block-post-content');
+                            const table = content?.querySelector('.wp-block-table');
+                            return title && content && table ? {
+                                title: getComputedStyle(title).overflowWrap,
+                                content: getComputedStyle(content).overflowWrap,
+                                tableOverflow: getComputedStyle(table).overflowX
+                            } : null;
+                        }""")
+                        assert styles == {
+                            'title': 'anywhere', 'content': 'anywhere', 'tableOverflow': 'auto'
+                        }, f'Missing frontend theme.json reflow CSS: {width}px {styles}'
+                        assert 'UnbrokenTitle' in page.locator('h1').inner_text()
+                        assert 'UnbrokenHeading' in page.locator('.wp-block-post-content h2').inner_text()
+                        assert 'UnbrokenWord' in page.locator('.wp-block-post-content').inner_text()
             assert not errors, f'Uncaught browser JavaScript errors: {errors}'
-            print('PASS: fixture content, search submission/empty state, archive, paging, 404, sitemap and reflow')
+            print('PASS: routes, 7 viewport widths, rendered theme.json CSS, long content and WooCommerce reflow (when enabled)')
         finally:
             browser.close()
 

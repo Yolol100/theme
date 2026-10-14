@@ -39,7 +39,7 @@ never add backend or payment code to the theme ZIP.
 
 ## Release evidence and limits
 
-- Baseline source ZIP and exact installation ZIP SHA-256: `ac880c7b65c95b30d0b24429172476bc32f1173c86ab46a3154fa1bb5e0a9550`.
+- Baseline exact installation ZIP SHA-256: `ac880c7b65c95b30d0b24429172476bc32f1173c86ab46a3154fa1bb5e0a9550`.
 - Every build must verify its own `dist/SHA256SUMS.txt` and link to its commit/run.
 - Installable filename: `Webactueel-Block-Starter-1.0.4-STAGING.zip`.
 - See `docs/QA.md`, `docs/77-scenarios.json`, and `docs/STAGING-ACCEPTANCE.md`.

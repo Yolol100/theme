@@ -647,7 +647,7 @@
     {
       "id": 72,
       "th": "TH-15",
-      "scenario": "Install exact v1.0.3 ZIP in clean WordPress (historisch stond foutief 1.0.1)",
+      "scenario": "Install exact release ZIP in clean WordPress",
       "priority": "P0",
       "baseline_status": "SMOKE_PASS",
       "acceptance_assertion": "Exacte SHA-theme-ZIP op lege WP; juiste slug, versie en alle file hashes",
