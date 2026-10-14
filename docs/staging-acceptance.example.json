@@ -3,7 +3,7 @@
   "staging_url": "",
   "artifact": {
     "commit_sha": "",
-    "theme_sha256": "ac880c7b65c95b30d0b24429172476bc32f1173c86ab46a3154fa1bb5e0a9550"
+    "theme_sha256": "4870933577e31cf176a9d953e095758dbc72c79737f5135adc195d246803c36a"
   },
   "gates": {
     "gutenberg_ui": {"status": "NOT_RUN"},
