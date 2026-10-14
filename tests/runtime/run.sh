@@ -68,8 +68,17 @@ curl --fail --silent --show-error --location http://localhost:8080/ > /dev/null
 wp option update page_on_front "$page_id"
 wp option update page_for_posts "$blog_id"
 wp option update show_on_front page
-curl --fail --silent --show-error --location http://localhost:8080/ | grep -q 'A visible example page'
-curl --fail --silent --show-error --location http://localhost:8080/ci-blog/ | grep -q 'CI Archive Article'
+# Read complete responses before testing fixture content; grep -q in a pipeline
+# terminates the curl writer early and can spuriously fail with exit 23.
+python3 - <<'PYVERIFY'
+from urllib.request import urlopen
+for path, marker in (('/', 'A visible example page'), ('/ci-blog/', 'CI Archive Article')):
+    with urlopen('http://localhost:8080' + path, timeout=30) as response:
+        assert response.status == 200, f'{path}: unexpected HTTP {response.status}'
+        text = response.read().decode('utf-8')
+        assert marker in text, f'{path}: missing expected content {marker!r}'
+print('PASS: static homepage and separate posts page content')
+PYVERIFY
 wp option update show_on_front posts
 curl --fail --silent --show-error --location 'http://localhost:8080/?s=Example' > /dev/null
 
