@@ -13,14 +13,37 @@ AXE = Path(os.environ.get('AXE_JS_PATH', 'node_modules/axe-core/axe.min.js'))
 REPORT = Path('reports/axe-audit.json')
 
 
+def keyboard_and_mobile_checks(page):
+    page.set_viewport_size({'width':375,'height':812})
+    response=page.goto(BASE+'/',wait_until='domcontentloaded')
+    assert response and response.status==200
+    trigger=page.locator('.wp-block-navigation__responsive-container-open').first
+    assert trigger.is_visible(), 'Missing mobile navigation button'
+    trigger.focus()
+    page.keyboard.press('Enter')
+    page.locator('.wp-block-navigation__responsive-container.is-menu-open').wait_for(state='visible',timeout=12000)
+    page.locator('.wp-block-navigation__responsive-container-close').first.focus()
+    page.keyboard.press('Enter')
+    page.wait_for_function("() => !document.querySelector('.wp-block-navigation__responsive-container.is-menu-open')",timeout=12000)
+    for width in (320,375,390,768,1280):
+        page.set_viewport_size({'width':width,'height':850})
+        for path in ('/','/ci-long-content/'):
+            response=page.goto(BASE+path,wait_until='domcontentloaded')
+            assert response and response.status==200
+            dimensions=page.evaluate("() => ({w:innerWidth,s:document.documentElement.scrollWidth})")
+            assert dimensions['s']<=dimensions['w']+2, (width,path,dimensions)
+    return {'mobile_keyboard':'PASS','long_content_reflow':'PASS','screenreader':'NOT_RUN'}
+
+
 def main():
     assert AXE.is_file(), f'The pinned axe-core file is missing: {AXE}'
-    paths = ['/', '/starter-page/', '/example-ci-post/', '/?s=Example', '/ci-nonexistent-page-938722/']
+    paths = ['/', '/starter-page/', '/example-ci-post/', '/?s=Example', '/ci-nonexistent-page-938722/', '/ci-long-content/']
     summaries = []
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
         try:
             page = browser.new_page(viewport={'width': 390, 'height': 844})
+            interactions=keyboard_and_mobile_checks(page)
             for path in paths:
                 response = page.goto(BASE + path, wait_until='domcontentloaded', timeout=45000)
                 assert response and response.status in (200, 404)
@@ -41,9 +64,11 @@ def main():
                 'human_screenreader_testing': 'NOT_RUN',
                 'wcag_conformance_claim': False,
                 'pages': summaries,
+                'keyboard_and_reflow': interactions,
             }, indent=2) + '\n')
             issues = sum(len(x['violations']) for x in summaries)
             print(f'AXE ADVISORY: scanned {len(summaries)} routes; {issues} violations reported; human WCAG-EM still required')
+            assert not any(row['violations'] for row in summaries), 'WCAG automated rule failure on theme pages'
         finally:
             browser.close()
 

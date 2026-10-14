@@ -219,10 +219,17 @@ class ThemeTests(unittest.TestCase):
         source=(ROOT/'tests/runtime/axe_audit.py').read_text()
         flow=(ROOT/'.github/workflows/wordpress-runtime.yml').read_text()
         runner=(ROOT/'tests/runtime/run.sh').read_text()
-        self.assertIn('axe-core@4.10.3',flow)
+        self.assertIn('axe-core@4.14.0',flow)
         self.assertIn('tests/runtime/axe_audit.py',runner)
         self.assertIn("'wcag_conformance_claim': False",source)
         self.assertIn("'human_screenreader_testing': 'NOT_RUN'",source)
+
+    def test_extended_keyboard_and_reflow_audit(self):
+        source=(ROOT/'tests/runtime/axe_audit.py').read_text()
+        self.assertIn('keyboard_and_mobile_checks',source)
+        self.assertIn('ci-long-content',source)
+        self.assertIn("'wcag_conformance_claim': False",source)
+        self.assertIn('assert not any(row',source)
 
     def test_woo_store_api_expects_created_on_new_cart_item(self):
         script=(ROOT/'tests/runtime/woo_store_api.py').read_text()
