@@ -75,7 +75,13 @@ def main():
             # separate isolated staging and human acceptance workflow.
             site_editor = page.goto(BASE + '/wp-admin/site-editor.php', wait_until='domcontentloaded')
             assert site_editor and site_editor.status == 200, 'Admin cannot open Site Editor'
-            assert page.locator('body').inner_text().strip(), 'Site Editor returned an empty shell'
+            # Site Editor is a React application: DOMContentLoaded may precede
+            # hydration, especially on WordPress 6.6. Still fail if it remains blank.
+            page.wait_for_function(
+                '() => Boolean(document.body && document.body.innerText.trim())',
+                timeout=45000,
+            )
+            assert page.locator('body').inner_text().strip(), 'Site Editor remained empty after hydration'
             response = page.goto(BASE + '/wp-admin/post-new.php?post_type=page', wait_until='domcontentloaded')
             assert response and response.status == 200
             if os.environ.get('RUN_EDITOR_E2E') == '1':
@@ -143,7 +149,13 @@ def main():
                     assert marker in body, f'Missing persisted Gutenberg Core block content: {marker}'
                 assert page.locator('main .wp-block-columns .wp-block-column').count() == 2
                 assert page.locator('main .wp-block-buttons a[href="/"]').count() == 1
-                assert page.locator('main .wp-block-table table td').count() == 2
+                # Core may create additional empty default cells. The contract
+                # is semantic table markup and preservation of both authored cells.
+                table = page.locator('main .wp-block-table table').first
+                assert table.count() == 1, 'Saved Core table is not rendered as a table'
+                assert table.locator('td').count() >= 2, 'Saved table cells are absent'
+                assert 'CI Table First' in table.inner_text(), 'First cell did not survive save/reload'
+                assert 'CI Table Second' in table.inner_text(), 'Second cell did not survive save/reload'
                 assert page.locator('main .wp-block-list li').count() == 1
                 print('PASS: Gutenberg editor store save/reopen and frontend paragraph, heading, columns, button, table and list')
                 test_editor_role_post(browser)
