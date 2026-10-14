@@ -66,8 +66,8 @@ jobs:
           python3 -m pip install --disable-pip-version-check playwright==1.56.0
           python3 -m playwright install --with-deps chromium
       - name: Install pinned axe-core for advisory audits
-        if: matrix.wp == 'latest' && matrix.php == '8.3' && matrix.woo == '0'
-        run: npm install --no-save --ignore-scripts --package-lock=false axe-core@4.10.3
+        if: matrix.wp == 'latest' && matrix.php == '8.3'
+        run: npm install --no-save --ignore-scripts --package-lock=false axe-core@4.14.0
       - name: WordPress and optional WooCommerce end-to-end checks
         run: bash tests/runtime/run.sh
       - name: Keep sanitized test receipt
@@ -75,7 +75,9 @@ jobs:
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: runtime-evidence-${{ matrix.wp }}-php${{ matrix.php }}-woo${{ matrix.woo }}
-          path: reports/*.json
+          path: |
+            reports/*.json
+            reports/screenshots/*.png
           if-no-files-found: warn
           retention-days: 30
       - name: Docker logs on failure

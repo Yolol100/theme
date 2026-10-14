@@ -51,6 +51,14 @@ wp eval 'for ($i=1; $i<=12; $i++) { wp_insert_post(array("post_title" => "CI Arc
 page_id="$(wp post create --post_type=page --post_title='Starter Page' \
     --post_content='A visible example page for CI testing.' --post_status=publish --porcelain | tr -d '\r')"
 wp option update blogname 'Webactueel CI'
+# Stress-test long unbroken content, headings and a wide Core table at small widths.
+wp post create --post_type=page --post_name='ci-long-content' --post_title='CI Long Content' \
+    --post_content='<!-- wp:heading --><h2>Long content reflow</h2><!-- /wp:heading --><!-- wp:paragraph --><p>UnbrokenWordAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</p><!-- /wp:paragraph --><!-- wp:table --><figure class="wp-block-table"><table><tbody><tr><td>Long table cell one</td><td>Long table cell two</td></tr></tbody></table></figure><!-- /wp:table -->' --post_status=publish
+# Synthetic, disposable authorisation fixture: no human or production account.
+if [ "$WP_TARGET" = latest ] && [ "${PHP_VERSION:-8.3}" = 8.3 ] && [ "$ENABLE_WOO" = 0 ]; then
+  wp user create ci_editor ci-editor@example.test --role=editor \
+    --user_pass='ci-editor-disposable-password'
+fi
 blog_id="$(wp post create --post_type=page --post_title='CI Blog' \
     --post_status=publish --porcelain | tr -d '\r')"
 
@@ -106,8 +114,8 @@ fi
 if [ "$ENABLE_WOO" = 0 ] && [ "$WP_TARGET" = latest ]; then
   bash tests/runtime/rollback.sh
 fi
-if [ "$ENABLE_WOO" = 0 ] && [ "$WP_TARGET" = latest ] && [ "${PHP_VERSION:-8.3}" = 8.3 ]; then
-  BASE_URL=http://localhost:8080 python3 tests/runtime/axe_audit.py
+if [ "$WP_TARGET" = latest ] && [ "${PHP_VERSION:-8.3}" = 8.3 ]; then
+  BASE_URL=http://localhost:8080 ENABLE_WOO="$ENABLE_WOO" python3 tests/runtime/axe_audit.py
 fi
 mkdir -p reports
 python3 - <<'PYRECEIPT'
