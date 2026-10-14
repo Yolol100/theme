@@ -170,6 +170,38 @@ class ThemeTests(unittest.TestCase):
         self.assertIn('exec -T wordpress test -f /var/www/html/wp-config.php', runner)
         self.assertNotIn('wp core version >/dev/null 2>&1', runner)
 
+    def test_77_scenarios_have_non_fabricated_baseline(self):
+        manifest=json.loads((ROOT/'docs/77-scenarios.json').read_text())
+        scenarios=manifest['scenarios']
+        self.assertEqual(len(scenarios),77)
+        self.assertEqual([x['id'] for x in scenarios],list(range(1,78)))
+        for case in scenarios:
+            self.assertIn(case['baseline_status'],{'SMOKE_PASS','PARTIAL','NOT_RUN','N/A_CI'})
+            self.assertTrue(case['acceptance_assertion'])
+        self.assertIn('not live results',manifest['purpose'])
+
+    def test_runtime_release_artifact_is_built_once(self):
+        flow=(ROOT/'.github/workflows/wordpress-runtime.yml').read_text()
+        src=(ROOT/'.github/workflows/ci.yml').read_text()
+        runner=(ROOT/'tests/runtime/run.sh').read_text()
+        self.assertIn('needs: package',flow)
+        self.assertIn('name: runtime-release',flow)
+        self.assertIn('actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3',flow)
+        self.assertIn('actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f',flow)
+        self.assertIn('actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f',src)
+        self.assertIn('sha256sum --check SHA256SUMS.txt',runner)
+        self.assertNotIn('python3 scripts/package.py',runner)
+        self.assertIn("php: '8.4'",flow)
+        self.assertIn('PHP_VERSION: ${{ matrix.php }}',flow)
+        self.assertIn('RUN_BROWSER',runner)
+
+    def test_runtime_tests_remain_outside_installable_theme(self):
+        for extra in ('tests/runtime/woo_store_api.py','tests/runtime/admin_smoke.py',
+                      'tests/runtime/rollback.sh','docs/77-scenarios.json'):
+            self.assertTrue((ROOT/extra).is_file())
+            self.assertIn(extra,(ROOT/'scripts/package.py').read_text())
+        self.assertNotIn('payment complete', (ROOT/'docs/STAGING-ACCEPTANCE.md').read_text())
+
     def test_packager_does_not_distribute_local_env_files(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)/'workspace'
@@ -242,7 +274,10 @@ class ThemeTests(unittest.TestCase):
                      'docs/QA.md','scripts/package.py','tests/test_starter.py',
                      '.github/workflows/wordpress-runtime.yml',
                      'tests/runtime/compose.yaml','tests/runtime/run.sh',
-                     'tests/runtime/browser_smoke.py','tests/runtime/seed_woo.php'} |
+                     'tests/runtime/browser_smoke.py','tests/runtime/seed_woo.php',
+                     'docs/STAGING-ACCEPTANCE.md','docs/77-scenarios.json',
+                     'tests/runtime/woo_store_api.py','tests/runtime/admin_smoke.py',
+                     'tests/runtime/rollback.sh'} |
                     {'optional-scaffolding/assets/','optional-scaffolding/patterns/',
                      'optional-scaffolding/styles/'})
                 for info in archive.infolist():

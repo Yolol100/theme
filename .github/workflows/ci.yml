@@ -10,31 +10,34 @@ jobs:
   source:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
-      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1, node24
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0, node24
         with:
           python-version: '3.12'
       - name: Static and security regression tests
         run: python3 -m unittest discover -s tests -v
       - name: Reproducible ZIP build
         run: python3 scripts/package.py
-      - name: Validate ZIP contents and hashes
+      - name: Verify release artifacts
         run: |
+          cd dist
+          sha256sum --check SHA256SUMS.txt
           python3 - <<'PY'
-          import hashlib, zipfile
+          import zipfile
           from pathlib import Path
-          root = Path('.')
-          install = root / 'dist/Webactueel-Block-Starter-1.0.3-STAGING.zip'
-          source = root / 'dist/Webactueel-Block-Starter-Source-1.0.3.zip'
+          install = Path('Webactueel-Block-Starter-1.0.3-STAGING.zip')
           with zipfile.ZipFile(install) as z:
               assert z.testzip() is None
               assert len(z.namelist()) == 12
-              assert all(p.startswith('webactueel-starter/') for p in z.namelist())
-          with zipfile.ZipFile(source) as z:
-              assert z.testzip() is None
-              assert 'tests/runtime/run.sh' in z.namelist()
-          sums = (root / 'dist/SHA256SUMS.txt').read_text()
-          for path in (install, source):
-              assert hashlib.sha256(path.read_bytes()).hexdigest() in sums
-          print('ZIP audit PASS')
+              assert all(name.startswith('webactueel-starter/') for name in z.namelist())
+          print('Release ZIP verification PASS')
           PY
+      - name: Preserve tested release archives
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0, node24
+        with:
+          name: source-release-${{ github.sha }}
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30

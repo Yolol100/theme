@@ -10,7 +10,9 @@ wp() { "${compose[@]}" run --rm -T cli wp "$@"; }
 : "${ENABLE_WOO:=0}"
 : "${RUN_BROWSER:=1}"
 
-python3 scripts/package.py
+# Use the single archive built by the workflow package job, not a new per-matrix build.
+(cd dist && sha256sum --check SHA256SUMS.txt)
+printf 'RUNTIME_THEME_SHA256=%s\n' "$(sha256sum dist/Webactueel-Block-Starter-1.0.3-STAGING.zip | cut -d' ' -f1)"
 "${compose[@]}" up --wait -d database wordpress
 
 # Probe the actual WordPress container instead of repeatedly starting WP-CLI.
@@ -40,11 +42,17 @@ wp core install --url=http://localhost:8080 --title='Webactueel CI' \
 wp theme install /workspace/dist/Webactueel-Block-Starter-1.0.3-STAGING.zip --activate
 wp option update permalink_structure '/%postname%/'
 wp rewrite flush --hard
-wp post create --post_type=post --post_title='Example CI Post' \
-    --post_content='Testing the Webactueel Starter theme.' --post_status=publish
+post_id="$(wp post create --post_type=post --post_title='Example CI Post' \
+    --post_content='Testing the Webactueel Starter theme.' --post_status=publish --porcelain | tr -d '\r')"
+wp term create category 'CI Category' --slug=ci-category
+wp post term add "$post_id" category ci-category
+wp option update posts_per_page 5
+wp eval 'for ($i=1; $i<=12; $i++) { wp_insert_post(array("post_title" => "CI Archive Article " . $i, "post_content" => "Synthetic article number " . $i, "post_status" => "publish", "post_type" => "post")); }'
 page_id="$(wp post create --post_type=page --post_title='Starter Page' \
     --post_content='A visible example page for CI testing.' --post_status=publish --porcelain | tr -d '\r')"
 wp option update blogname 'Webactueel CI'
+blog_id="$(wp post create --post_type=page --post_title='CI Blog' \
+    --post_status=publish --porcelain | tr -d '\r')"
 
 if [ "$ENABLE_WOO" = 1 ]; then
   wp plugin install woocommerce --activate
@@ -57,14 +65,39 @@ fi
 # Exercise both common Reading configurations against the installed ZIP.
 wp option update show_on_front posts
 curl --fail --silent --show-error --location http://localhost:8080/ > /dev/null
-wp option update show_on_front page
 wp option update page_on_front "$page_id"
-curl --fail --silent --show-error --location http://localhost:8080/ > /dev/null
+wp option update page_for_posts "$blog_id"
+wp option update show_on_front page
+curl --fail --silent --show-error --location http://localhost:8080/ | grep -q 'A visible example page'
+curl --fail --silent --show-error --location http://localhost:8080/ci-blog/ | grep -q 'CI Archive Article'
 wp option update show_on_front posts
 curl --fail --silent --show-error --location 'http://localhost:8080/?s=Example' > /dev/null
 
 if [ "$RUN_BROWSER" = 1 ]; then
-  BASE_URL=http://127.0.0.1:8080 ENABLE_WOO="$ENABLE_WOO" python3 tests/runtime/browser_smoke.py
+  BASE_URL=http://localhost:8080 ENABLE_WOO="$ENABLE_WOO" python3 tests/runtime/browser_smoke.py
+  BASE_URL=http://localhost:8080 python3 tests/runtime/admin_smoke.py
 fi
+if [ "$ENABLE_WOO" = 1 ]; then
+  BASE_URL=http://localhost:8080 python3 tests/runtime/woo_store_api.py
+fi
+if [ "$ENABLE_WOO" = 0 ] && [ "$WP_TARGET" = latest ]; then
+  bash tests/runtime/rollback.sh
+fi
+mkdir -p reports
+python3 - <<'PYRECEIPT'
+import hashlib, json, os, pathlib
+file = pathlib.Path('dist/Webactueel-Block-Starter-1.0.3-STAGING.zip')
+receipt = {
+    'scope': 'disposable-ci',
+    'theme_sha256': hashlib.sha256(file.read_bytes()).hexdigest(),
+    'wordpress_target': os.environ.get('WP_TARGET', 'latest'),
+    'php_target': os.environ.get('PHP_VERSION', '8.3'),
+    'woocommerce_enabled': os.environ.get('ENABLE_WOO') == '1',
+    'payments_or_wcag_certified': False,
+}
+pathlib.Path('reports/test-receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
+print('PASS: evidence receipt', receipt['theme_sha256'])
+PYRECEIPT
+
 wp theme status webactueel-starter
 wp core version

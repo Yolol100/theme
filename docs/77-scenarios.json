@@ -1,0 +1,702 @@
+{
+  "baseline_revision": "e00d6008b28aa0c6fb9bed0b5aca51422a9557f8",
+  "baseline_date": "2026-10-14",
+  "purpose": "Scenario specifications; not live results",
+  "warning": "Never upgrade a scenario to PASS without traceable runtime, browser, AT or staging evidence.",
+  "scenario_count": 77,
+  "scenarios": [
+    {
+      "id": 1,
+      "th": "TH-03",
+      "scenario": "Clean WordPress default blog home",
+      "priority": "P1",
+      "baseline_status": "SMOKE_PASS",
+      "acceptance_assertion": "Homepage / toont recente berichten in juiste volgorde en geen PHP/browserfouten",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 2,
+      "th": "TH-03",
+      "scenario": "Static homepage with assigned page content",
+      "priority": "P1",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "Statische pagina-inhoud en H1 zijn zichtbaar na toewijzing; blogcontent niet op voorpagina",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 3,
+      "th": "TH-03",
+      "scenario": "Separate blog posts page",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Pagina \"Blog\" als posts-page; artikelen en paginering verschijnen op die URL",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 4,
+      "th": "TH-03",
+      "scenario": "Published page and very long body",
+      "priority": "P1",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "Lange pagina bevat de volledige tekst zonder afkappen/overflow",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 5,
+      "th": "TH-03",
+      "scenario": "Single post with images, table and embeds",
+      "priority": "P1",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "Artikel toont afbeelding, alt, tabel en embed zonder console/HTTP-errors",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 6,
+      "th": "TH-03",
+      "scenario": "Category, tag, author and date archives",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Categorie, tag, auteur en datum tonen juiste posts/H1 en HTTP 200",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 7,
+      "th": "TH-03",
+      "scenario": "Search with results",
+      "priority": "P1",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "Zoekterm via formulier ingediend, resultaat- en querytekst zichtbaar",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 8,
+      "th": "TH-03",
+      "scenario": "Search with no results",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Niet-bestaande term toont toegankelijk expliciet leeg-resultaat",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 9,
+      "th": "TH-03",
+      "scenario": "Empty archives",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Leeg archief geeft juiste context/geen kapotte query",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 10,
+      "th": "TH-03",
+      "scenario": "Pagination with more than one page",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Meer dan 1 pagina: vorige/volgende/nummers bevatten juiste posts",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 11,
+      "th": "TH-03",
+      "scenario": "Unknown URL returns real 404 status",
+      "priority": "P1",
+      "baseline_status": "SMOKE_PASS",
+      "acceptance_assertion": "Onbekende URL geeft 404 en hersteloptie, niet enkel lege body",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 12,
+      "th": "TH-03",
+      "scenario": "Custom post type fallback where installed",
+      "priority": "P2",
+      "baseline_status": "N/A_CI",
+      "acceptance_assertion": "Alleen bij sites met CPT: fallback bevat juiste titel/content; elders N/A gemotiveerd",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 13,
+      "th": "TH-03",
+      "scenario": "Very long title and unbroken words",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Ongebroken woord/lange titel is leesbaar bij 320px en 200% zoom",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 14,
+      "th": "TH-05",
+      "scenario": "Admin creates and saves page",
+      "priority": "P0",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "Admin maakt pagina in Gutenberg; save\u2192reload\u2192front-end tekst gelijk",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 15,
+      "th": "TH-05",
+      "scenario": "Editor creates and saves post",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Editorrol kan post opslaan/publiceren binnen rechten; geen admin-privileges",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 16,
+      "th": "TH-05",
+      "scenario": "Site editor changes header/footer",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Header en footer wijzigen; opslaan, opnieuw openen en frontend tonen wijzigingen",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 17,
+      "th": "TH-05",
+      "scenario": "Create navigation menu then reopen",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Navigatie-item opslaan, heropenen, desktop/mobile functionele bestemming",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 18,
+      "th": "TH-05",
+      "scenario": "Upload logo and reopen editor",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Logo upload, alt/afbeelding behouden na heropenen en op frontend zichtbaar",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 19,
+      "th": "TH-05",
+      "scenario": "Change colors and typography then publish",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Kleur + typografie gewijzigd; opgeslagen, heropend en berekende CSS klopt",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 20,
+      "th": "TH-05",
+      "scenario": "Custom widths and full-width blocks stay consistent",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Wide/full alignment heeft editor/frontend parity bij verschillende breedtes",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 21,
+      "th": "TH-05",
+      "scenario": "Gutenberg block save/reload validation",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Blokken toevoegen/bewerken en heropenen zonder invalid block warnings",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 22,
+      "th": "TH-05",
+      "scenario": "Editor changes retained after theme update",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Editorwijzigingen behouden na veilige update/rollback van dezelfde slug",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 23,
+      "th": "TH-05",
+      "scenario": "Theme switch back retains WP native content",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Native WP-inhoud blijft intact bij theme switch en terugschakelen",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 24,
+      "th": "TH-08",
+      "scenario": "Viewport 320px",
+      "priority": "P1",
+      "baseline_status": "SMOKE_PASS",
+      "acceptance_assertion": "320px: geen horizontale scroll en menu/CTA/focus blijven bruikbaar",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 25,
+      "th": "TH-08",
+      "scenario": "Viewport 375px",
+      "priority": "P1",
+      "baseline_status": "SMOKE_PASS",
+      "acceptance_assertion": "375px: responsive content en touch targets worden handmatig meegekeurd",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 26,
+      "th": "TH-08",
+      "scenario": "Viewport 390px",
+      "priority": "P1",
+      "baseline_status": "SMOKE_PASS",
+      "acceptance_assertion": "390px: responsive content en touch targets worden handmatig meegekeurd",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 27,
+      "th": "TH-08",
+      "scenario": "Viewport 768px",
+      "priority": "P1",
+      "baseline_status": "SMOKE_PASS",
+      "acceptance_assertion": "768px: layout/wide content/navigatie zijn correct",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 28,
+      "th": "TH-08",
+      "scenario": "Viewport 1024px",
+      "priority": "P1",
+      "baseline_status": "SMOKE_PASS",
+      "acceptance_assertion": "1024px: layout/wide content/navigatie zijn correct",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 29,
+      "th": "TH-08",
+      "scenario": "Viewport 1440px",
+      "priority": "P1",
+      "baseline_status": "SMOKE_PASS",
+      "acceptance_assertion": "1440px: layout/wide content/navigatie zijn correct",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 30,
+      "th": "TH-08",
+      "scenario": "Viewport 1920px",
+      "priority": "P1",
+      "baseline_status": "SMOKE_PASS",
+      "acceptance_assertion": "1920px: max-content widths/alignments zijn correct",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 31,
+      "th": "TH-08",
+      "scenario": "Large text and 200 percent zoom",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "200% browserzoom en verhoogde tekst tonen geen verlies van content of focus",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 32,
+      "th": "TH-08",
+      "scenario": "RTL reading direction",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "RTL-tekst/navigatie/alignments hebben logische volgorde en geen clipping",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 33,
+      "th": "TH-08",
+      "scenario": "Image/gallery large media reflow",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Galerij/grote afbeeldingen/tabellen schalen op 320-1920px zonder overloop",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 34,
+      "th": "TH-09",
+      "scenario": "Keyboard navigation and visible focus",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Alle acties bereikbaar met Tab/Shift+Tab/Enter/Esc; focus indicator zichtbaar",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 35,
+      "th": "TH-09",
+      "scenario": "Mobile navigation expanded and closed by keyboard",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Menuknop opent/sluit met keyboard en Esc, focus beweegt logisch",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 36,
+      "th": "TH-09",
+      "scenario": "Screen reader landmarks and navigation",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Landmarks, labels, menu-state en volgorde hoorbaar; menselijke AT-waarneming",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 37,
+      "th": "TH-09",
+      "scenario": "Search field accessible name",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Zoekinput heeft toegankelijke labelnaam en functionerende submit",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 38,
+      "th": "TH-09",
+      "scenario": "100-200 percent zoom reflow",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "100-200% zoom/320px reflow zonder verlies inhoud/functie",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 39,
+      "th": "TH-09",
+      "scenario": "Text/background and link hover/focus contrast",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Alle echte states incl hover/focus voldoen aan WCAG 2.2 AA",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 40,
+      "th": "TH-09",
+      "scenario": "Navigation touch targets",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Interactieve doelen voldoen aan relevante 2.2 SC 2.5.8 uitzonderingen",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 41,
+      "th": "TH-09",
+      "scenario": "Reduced motion with Core blocks",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Essenti\u00eble animaties zijn uitgeschakeld/aangepast indien aanwezig",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 42,
+      "th": "TH-10",
+      "scenario": "Logo click navigates home",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Site-logo klikt naar home en focuseert/labelt correct",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 43,
+      "th": "TH-10",
+      "scenario": "Navigation menu items and dropdowns work",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Navigation links/dropdowns keyboard/mouse openen en navigeren",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 44,
+      "th": "TH-10",
+      "scenario": "Search submit navigates to results",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Getypte query + Enter/submit leidt naar zoekresultaten met betekenisvolle URL",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 45,
+      "th": "TH-10",
+      "scenario": "Pagination prev/next retains search/archive context",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Prev/next links behouden zoek- en taxonomiecontext",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 46,
+      "th": "TH-10",
+      "scenario": "404 search recovery link",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "404-zoekveld werkt en leidt naar resultaten of leeg-resultaat",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 47,
+      "th": "TH-10",
+      "scenario": "Link targets and error states work",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Interne links 2xx/verwachte 404; mislukking zichtbaar, geen dead ends",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 48,
+      "th": "TH-11",
+      "scenario": "Document title and canonical owned by WP or SEO plugin",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "E\u00e9n title/canonical eigenaar; geen dubbel canoniek bij SEO-pluginprofiel",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 49,
+      "th": "TH-11",
+      "scenario": "Robots indexing and sitemap",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Robots/index intent en sitemap URLs correct, geen staging-indexatie",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 50,
+      "th": "TH-11",
+      "scenario": "Yoast/RankMath optional integration no duplicates",
+      "priority": "P2",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Yoast of Rank Math alleen op gekozen klantstack; nooit dubbele meta/JSON-LD",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 51,
+      "th": "TH-11",
+      "scenario": "Semantic heading order on rendered routes",
+      "priority": "P1",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "H1/H2 semantisch juist op home/page/post/archive/search/404/product",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 52,
+      "th": "TH-12",
+      "scenario": "LCP field/lab measurement",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "LCP <=2.5s p75 op mobiel/desktop of transparant geen velddata",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 53,
+      "th": "TH-12",
+      "scenario": "CLS and responsive image sizing",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "CLS <=0.1 p75 en beeld-afmetingen/reserved space gecontroleerd",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 54,
+      "th": "TH-12",
+      "scenario": "INP responsiveness on menu",
+      "priority": "P1",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "INP <=200ms p75 voor echte interacties; lab is afzonderlijk",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 55,
+      "th": "TH-12",
+      "scenario": "Cache/CDN asset behavior",
+      "priority": "P2",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Assets/headers en private cart/account niet in gedeelde cache",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 56,
+      "th": "TH-12",
+      "scenario": "Cold/warm cache comparison",
+      "priority": "P2",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Warm/cold herhaalbaar gemeten op gekozen hosting; geen claims op lege starter",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 57,
+      "th": "TH-12",
+      "scenario": "WP debug log and browser network",
+      "priority": "P0",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "Geen nieuwe kritieke WP/PHP fouten, 404 resources of console/network errors",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 58,
+      "th": "TH-13",
+      "scenario": "WooCommerce absent: no errors on ordinary pages",
+      "priority": "P1",
+      "baseline_status": "SMOKE_PASS",
+      "acceptance_assertion": "Home/page/post/404/zoeken blijven normaal zonder Woo-plugin",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 59,
+      "th": "TH-13",
+      "scenario": "WooCommerce activates and registers own templates",
+      "priority": "P0",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "Woo eigen templates en Block Cart/Checkout aanwezig; geen overrideconflict",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 60,
+      "th": "TH-13",
+      "scenario": "Product catalog and category/tag",
+      "priority": "P0",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "Winkel, productcategorie/-tag tonen producten met juiste inhoud en links",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 61,
+      "th": "TH-13",
+      "scenario": "Simple product and image gallery",
+      "priority": "P0",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "Productbeeld en galeriestate functioneel; prijs/voorraad en CTA correct",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 62,
+      "th": "TH-13",
+      "scenario": "Variable product and variations",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Variantkeuze, prijs, voorraad/invalid states en cart consistent",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 63,
+      "th": "TH-13",
+      "scenario": "Inventory and sold-out states",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Op voorraad/uitverkocht/backorder instellingen en CTA-status juist",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 64,
+      "th": "TH-13",
+      "scenario": "Add to cart/remove/update quantity",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Toevoegen, aantal wijzigen, verwijderen en cookiesessie echt bewezen",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 65,
+      "th": "TH-13",
+      "scenario": "Empty cart and checkout page content",
+      "priority": "P0",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "Lege cart, lege checkout, validatie- en empty states correct",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 66,
+      "th": "TH-13",
+      "scenario": "Guest checkout sandbox order",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Gastorder volledig afronden; orderstatus/voorraad bevestigen; nooit echte betaling",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 67,
+      "th": "TH-13",
+      "scenario": "Logged-in checkout sandbox order",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Klantorder na login inclusief bevestiging en status, privacy en voorraad",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 68,
+      "th": "TH-13",
+      "scenario": "Account/login/reset password",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Login/logout/reset password zonder echte mail- of klantgegevens in publieke CI",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 69,
+      "th": "TH-13",
+      "scenario": "Tax/shipping/coupons/payment extension combinations",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Afgesproken tax/verzend/coupon/gateway-extensies werken in sandbox",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 70,
+      "th": "TH-13",
+      "scenario": "Dynamic checkout excluded from public caching",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Gast A ziet nooit cart/customergegevens van gast B; checkout ongecached",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 71,
+      "th": "TH-13",
+      "scenario": "Mobile checkout and form errors",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "Mobile checkout/invalid velden/focus/errortekst en toetsenbord functioneel",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 72,
+      "th": "TH-15",
+      "scenario": "Install exact v1.0.3 ZIP in clean WordPress (historisch stond foutief 1.0.1)",
+      "priority": "P0",
+      "baseline_status": "SMOKE_PASS",
+      "acceptance_assertion": "Exacte SHA-theme-ZIP op lege WP; juiste slug, versie en alle file hashes",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 73,
+      "th": "TH-15",
+      "scenario": "Activate with WP_DEBUG enabled",
+      "priority": "P0",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "Debug aan, herlaad routes, geen PHP-fatal/notice gerelateerd aan theme",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 74,
+      "th": "TH-15",
+      "scenario": "Confirm no missing Core assets and no PHP errors",
+      "priority": "P0",
+      "baseline_status": "PARTIAL",
+      "acceptance_assertion": "Geen kritieke PHP-errors, 404 scripts/assets, JS pageerrors bij kernflows",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 75,
+      "th": "TH-15",
+      "scenario": "Test declared WP 6.6 minimum + current supported core",
+      "priority": "P0",
+      "baseline_status": "SMOKE_PASS",
+      "acceptance_assertion": "Min WP 6.6/PHP 8.3 plus huidig WP/PHP 8.3 en 8.4 ondersteund bewezen",
+      "human_or_target_site_required": false
+    },
+    {
+      "id": 76,
+      "th": "TH-16",
+      "scenario": "Restore backup rollback after failed activation",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "DB + uploads veilig herstellen na themaswitch/fout; geverifieerde URL/content",
+      "human_or_target_site_required": true
+    },
+    {
+      "id": 77,
+      "th": "TH-16",
+      "scenario": "Owner/QA approval after staging and independent rerun",
+      "priority": "P0",
+      "baseline_status": "NOT_RUN",
+      "acceptance_assertion": "TH-01..16 evidence, risicolog, teamreview, exact ZIP/hash en signoff",
+      "human_or_target_site_required": true
+    }
+  ]
+}

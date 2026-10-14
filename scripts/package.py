@@ -25,6 +25,11 @@ SOURCE_FILES = frozenset({
     '.gitignore', '.github/workflows/ci.yml', 'README.md',
     'docs/QA.md', 'scripts/package.py', 'tests/test_starter.py',
     '.github/workflows/wordpress-runtime.yml',
+    'docs/STAGING-ACCEPTANCE.md',
+    'docs/77-scenarios.json',
+    'tests/runtime/woo_store_api.py',
+    'tests/runtime/admin_smoke.py',
+    'tests/runtime/rollback.sh',
     'tests/runtime/compose.yaml', 'tests/runtime/run.sh',
     'tests/runtime/browser_smoke.py', 'tests/runtime/seed_woo.php',
 })
