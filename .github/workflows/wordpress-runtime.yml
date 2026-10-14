@@ -49,6 +49,7 @@ jobs:
       PHP_VERSION: ${{ matrix.php }}
       WP_TARGET: ${{ matrix.wp }}
       ENABLE_WOO: ${{ matrix.woo }}
+      BROWSER_ENGINES: ${{ matrix.wp == 'latest' && matrix.php == '8.3' && matrix.woo == '0' && 'chromium,firefox,webkit' || 'chromium' }}
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
       - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
@@ -64,7 +65,11 @@ jobs:
       - name: Install browser test dependencies
         run: |
           python3 -m pip install --disable-pip-version-check playwright==1.56.0
-          python3 -m playwright install --with-deps chromium
+          if [ "$BROWSER_ENGINES" = 'chromium,firefox,webkit' ]; then
+            python3 -m playwright install --with-deps chromium firefox webkit
+          else
+            python3 -m playwright install --with-deps chromium
+          fi
       - name: Install pinned axe-core for advisory audits
         if: matrix.wp == 'latest' && matrix.php == '8.3'
         run: npm install --no-save --ignore-scripts --package-lock=false axe-core@4.14.0

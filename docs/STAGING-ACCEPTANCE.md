@@ -122,7 +122,7 @@ Run:
 
 ```bash
 python3 scripts/validate_staging_acceptance.py private-receipt.json \
-  --zip dist/Webactueel-Block-Starter-1.0.4-STAGING.zip \
+  --zip dist/Webactueel-Block-Starter-1.0.5-STAGING.zip \
   --expected-commit <full-intended-commit-sha> --require-complete
 ```
 

@@ -12,7 +12,7 @@ wp() { "${compose[@]}" run --rm -T cli wp "$@"; }
 
 # Use the single archive built by the workflow package job, not a new per-matrix build.
 (cd dist && sha256sum --check SHA256SUMS.txt)
-printf 'RUNTIME_THEME_SHA256=%s\n' "$(sha256sum dist/Webactueel-Block-Starter-1.0.4-STAGING.zip | cut -d' ' -f1)"
+printf 'RUNTIME_THEME_SHA256=%s\n' "$(sha256sum dist/Webactueel-Block-Starter-1.0.5-STAGING.zip | cut -d' ' -f1)"
 "${compose[@]}" up --wait -d database wordpress
 
 # Probe the actual WordPress container instead of repeatedly starting WP-CLI.
@@ -39,7 +39,7 @@ fi
 wp core install --url=http://localhost:8080 --title='Webactueel CI' \
     --admin_user=ci_admin --admin_password='ci-local-only-password' \
     --admin_email=ci@example.test --skip-email
-wp theme install /workspace/dist/Webactueel-Block-Starter-1.0.4-STAGING.zip --activate
+wp theme install /workspace/dist/Webactueel-Block-Starter-1.0.5-STAGING.zip --activate
 wp option update permalink_structure '/%postname%/'
 wp rewrite flush --hard
 post_id="$(wp post create --post_type=post --post_title='Example CI Post' \
@@ -50,12 +50,12 @@ wp option update posts_per_page 5
 wp eval 'for ($i=1; $i<=12; $i++) { wp_insert_post(array("post_title" => "CI Archive Article " . $i, "post_content" => "Synthetic article number " . $i, "post_status" => "publish", "post_type" => "post")); }'
 page_id="$(wp post create --post_type=page --post_title='Starter Page' \
     --post_content='A visible example page for CI testing.' --post_status=publish --porcelain | tr -d '\r')"
-wp option update blogname 'Webactueel CI'
+wp option update blogname 'CI-UnbrokenBrand'$(printf 'B%.0s' {1..110})
 # Stress-test long unbroken content, headings and a wide Core table at small widths.
 wp post create --post_type=page --post_name='ci-long-content' --post_title='CI Long Content UnbrokenTitleBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB' \
     --post_content='<!-- wp:heading --><h2 class="wp-block-heading">UnbrokenHeadingCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC</h2><!-- /wp:heading --><!-- wp:paragraph --><p>UnbrokenWordAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</p><!-- /wp:paragraph --><!-- wp:table --><figure class="wp-block-table"><table><tbody><tr><td>Long table cell one</td><td>Long table cell two</td></tr></tbody></table></figure><!-- /wp:table -->' --post_status=publish
 # Synthetic, disposable authorisation fixture: no human or production account.
-if [ "$WP_TARGET" = latest ] && [ "${PHP_VERSION:-8.3}" = 8.3 ] && [ "$ENABLE_WOO" = 0 ]; then
+if [ "${PHP_VERSION:-8.3}" = 8.3 ] && [ "$ENABLE_WOO" = 0 ]; then
   wp user create ci_editor ci-editor@example.test --role=editor \
     --user_pass='ci-editor-disposable-password'
 fi
@@ -96,7 +96,7 @@ curl --fail --silent --show-error --location 'http://localhost:8080/?s=Example' 
 
 if [ "$RUN_BROWSER" = 1 ]; then
   BASE_URL=http://localhost:8080 ENABLE_WOO="$ENABLE_WOO" python3 tests/runtime/browser_smoke.py
-  if [ "$WP_TARGET" = latest ] && [ "${PHP_VERSION:-8.3}" = 8.3 ] && [ "$ENABLE_WOO" = 0 ]; then
+  if [ "${PHP_VERSION:-8.3}" = 8.3 ] && [ "$ENABLE_WOO" = 0 ]; then
     RUN_EDITOR_E2E=1 EDITOR_TEST_PAGE_ID="$page_id" BASE_URL=http://localhost:8080 python3 tests/runtime/admin_smoke.py
   else
     BASE_URL=http://localhost:8080 python3 tests/runtime/admin_smoke.py
@@ -120,7 +120,7 @@ fi
 mkdir -p reports
 python3 - <<'PYRECEIPT'
 import hashlib, json, os, pathlib
-file = pathlib.Path('dist/Webactueel-Block-Starter-1.0.4-STAGING.zip')
+file = pathlib.Path('dist/Webactueel-Block-Starter-1.0.5-STAGING.zip')
 receipt = {
     'scope': 'disposable-ci',
     'theme_sha256': hashlib.sha256(file.read_bytes()).hexdigest(),

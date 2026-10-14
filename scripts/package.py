@@ -12,8 +12,8 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 THEME = ROOT / 'theme' / 'webactueel-starter'
 DIST = ROOT / 'dist'
-THEME_ZIP = DIST / 'Webactueel-Block-Starter-1.0.4-STAGING.zip'
-SOURCE_ZIP = DIST / 'Webactueel-Block-Starter-Source-1.0.4.zip'
+THEME_ZIP = DIST / 'Webactueel-Block-Starter-1.0.5-STAGING.zip'
+SOURCE_ZIP = DIST / 'Webactueel-Block-Starter-Source-1.0.5.zip'
 
 RUNTIME_FILES = frozenset({
     'style.css', 'theme.json', 'LICENSE.txt',

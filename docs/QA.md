@@ -69,3 +69,17 @@ a human UI edit. Passing synthetic checkout with `cheque` is **not** a payment
 provider sandbox. Restoring a temporary Docker database and uploads is **not**
 hosting rollback. The six missing target/human gates and safe sign-off process
 are specified in `docs/STAGING-ACCEPTANCE.md` and the unapproved receipt example.
+
+## Corrective release 1.0.5: unbroken site names and cross-browser guard
+
+An additional isolated Chromium reproduction demonstrated that a 320px flex-header
+containing an unbroken 140-character site name could overflow before the fix.
+Extend the *existing* native `theme.json` wrap rule to `.wp-block-site-title`
+without adding standalone CSS or JavaScript. A disposable WordPress long-site-title
+fixture checks the real computed style and document width at seven viewport widths.
+Latest WordPress/PHP 8.3 without WooCommerce also tests Chromium, Firefox and
+WebKit; WordPress 6.6 now exercises the gated Gutenberg store roundtrip.
+
+These are automated tests in disposable CI, not manual Safari/Firefox, hosted
+staging, production accessibility or third-party payment evidence. Keep those
+acceptance gates open. Version 1.0.4 remains the previous rollback artifact.

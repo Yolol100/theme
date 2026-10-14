@@ -60,7 +60,7 @@
         }
       }
     },
-    "css": ".wp-block-post-title, .wp-block-post-content { overflow-wrap: anywhere; } .wp-block-post-content .wp-block-table { max-width: 100%; overflow-x: auto; }"
+    "css": ".wp-block-post-title, .wp-block-post-content, .wp-block-site-title { overflow-wrap: anywhere; } .wp-block-post-content .wp-block-table { max-width: 100%; overflow-x: auto; }"
   },
   "templateParts": [
     {

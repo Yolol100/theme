@@ -7,6 +7,7 @@ from playwright.sync_api import sync_playwright
 
 BASE = os.environ.get('BASE_URL', 'http://localhost:8080').rstrip('/')
 WOO = os.environ.get('ENABLE_WOO', '0') == '1'
+ENGINES = tuple(x.strip() for x in os.environ.get('BROWSER_ENGINES', 'chromium').split(',') if x.strip())
 
 
 def verify(page, path, status=200, includes=()):
@@ -23,71 +24,83 @@ def verify(page, path, status=200, includes=()):
     assert 'There has been a critical error' not in text
 
 
-def main():
+def check_engine(browser, name):
     errors = []
+    try:
+        page = browser.new_page(viewport={'width': 1280, 'height': 800})
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        verify(page, '/', includes=('Latest posts', 'CI Archive Article'))
+        verify(page, '/starter-page/', includes=('Starter Page', 'A visible example page'))
+        verify(page, '/example-ci-post/', includes=('Example CI Post', 'Testing the Webactueel Starter'))
+        verify(page, '/?s=Example', includes=('Example CI Post',))
+        verify(page, '/?s=ci-nothing-0d9e7b4', includes=('No posts found',))
+        verify(page, '/category/ci-category/', includes=('Example CI Post',))
+        verify(page, '/?paged=3', includes=('Example CI Post',))
+        verify(page, '/ci-nonexistent-page-938722/', status=404, includes=('Page not found',))
+        search = page.locator('main input[type="search"]').first
+        search.fill('Example')
+        search.press('Enter')
+        page.wait_for_url('**/?s=Example', timeout=15000)
+        assert 'Example CI Post' in page.locator('main').inner_text()
+        response = page.goto(BASE + '/wp-sitemap.xml')
+        assert response and response.status == 200, 'WordPress native sitemap missing'
+        if WOO:
+            for path in ('/shop/', '/cart/', '/checkout/', '/product/ci-test-product/'):
+                verify(page, path)
+            verify(page, '/product/ci-test-product/', includes=('CI Test Product',))
+        # Check the full content fixture, not only the empty-ish homepage.
+        # A table may scroll internally; the document itself must never grow.
+        paths = ('/', '/starter-page/', '/example-ci-post/', '/ci-long-content/')
+        if WOO:
+            paths += ('/shop/', '/cart/', '/checkout/', '/product/ci-test-product/')
+        for width in (320, 375, 390, 768, 1024, 1440, 1920):
+            page.set_viewport_size({'width': width, 'height': 850})
+            for path in paths:
+                verify(page, path)
+                dimensions = page.evaluate("""() => ({
+                    viewport: window.innerWidth,
+                    document: document.documentElement.scrollWidth
+                })""")
+                assert dimensions['document'] <= dimensions['viewport'] + 2, (
+                    f'Horizontal document overflow: {width}px {path} {dimensions}'
+                )
+                if path == '/ci-long-content/':
+                    # Computed CSS proves the theme.json rule is active on
+                    # the rendered frontend, rather than only in a file.
+                    styles = page.evaluate("""() => {
+                        const title = document.querySelector('.wp-block-post-title');
+                        const content = document.querySelector('.wp-block-post-content');
+                        const table = content?.querySelector('.wp-block-table');
+                        return title && content && table ? {
+                            title: getComputedStyle(title).overflowWrap,
+                            content: getComputedStyle(content).overflowWrap,
+                            tableOverflow: getComputedStyle(table).overflowX
+                        } : null;
+                    }""")
+                    assert styles == {
+                        'title': 'anywhere', 'content': 'anywhere', 'tableOverflow': 'auto'
+                    }, f'Missing frontend theme.json reflow CSS: {width}px {styles}'
+                    assert 'UnbrokenTitle' in page.locator('h1').inner_text()
+                    assert 'UnbrokenHeading' in page.locator('.wp-block-post-content h2').inner_text()
+                    assert 'UnbrokenWord' in page.locator('.wp-block-post-content').inner_text()
+                site = page.locator('.wp-block-site-title').first
+                assert site.count() == 1, f'{name}: expected site title in theme header'
+                assert 'CI-UnbrokenBrand' in site.inner_text(), f'{name}: missing long site title fixture'
+                assert site.evaluate('(node) => getComputedStyle(node).overflowWrap') == 'anywhere', (
+                    f'{name}: theme.json site-title wrapping not applied at {width}px'
+                )
+        assert not errors, f'Uncaught browser JavaScript errors: {errors}'
+        print(f'PASS [{name}]: routes, 7 viewport widths, rendered theme.json CSS, long content and WooCommerce reflow (when enabled)')
+    finally:
+        browser.close()
+
+
+def main():
+    assert ENGINES and set(ENGINES).issubset({'chromium', 'firefox', 'webkit'}), ENGINES
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(headless=True)
-        try:
-            page = browser.new_page(viewport={'width': 1280, 'height': 800})
-            page.on('pageerror', lambda error: errors.append(str(error)))
-            verify(page, '/', includes=('Latest posts', 'CI Archive Article'))
-            verify(page, '/starter-page/', includes=('Starter Page', 'A visible example page'))
-            verify(page, '/example-ci-post/', includes=('Example CI Post', 'Testing the Webactueel Starter'))
-            verify(page, '/?s=Example', includes=('Example CI Post',))
-            verify(page, '/?s=ci-nothing-0d9e7b4', includes=('No posts found',))
-            verify(page, '/category/ci-category/', includes=('Example CI Post',))
-            verify(page, '/?paged=3', includes=('Example CI Post',))
-            verify(page, '/ci-nonexistent-page-938722/', status=404, includes=('Page not found',))
-            search = page.locator('main input[type="search"]').first
-            search.fill('Example')
-            search.press('Enter')
-            page.wait_for_url('**/?s=Example', timeout=15000)
-            assert 'Example CI Post' in page.locator('main').inner_text()
-            response = page.goto(BASE + '/wp-sitemap.xml')
-            assert response and response.status == 200, 'WordPress native sitemap missing'
-            if WOO:
-                for path in ('/shop/', '/cart/', '/checkout/', '/product/ci-test-product/'):
-                    verify(page, path)
-                verify(page, '/product/ci-test-product/', includes=('CI Test Product',))
-            # Check the full content fixture, not only the empty-ish homepage.
-            # A table may scroll internally; the document itself must never grow.
-            paths = ('/', '/starter-page/', '/example-ci-post/', '/ci-long-content/')
-            if WOO:
-                paths += ('/shop/', '/cart/', '/checkout/', '/product/ci-test-product/')
-            for width in (320, 375, 390, 768, 1024, 1440, 1920):
-                page.set_viewport_size({'width': width, 'height': 850})
-                for path in paths:
-                    verify(page, path)
-                    dimensions = page.evaluate("""() => ({
-                        viewport: window.innerWidth,
-                        document: document.documentElement.scrollWidth
-                    })""")
-                    assert dimensions['document'] <= dimensions['viewport'] + 2, (
-                        f'Horizontal document overflow: {width}px {path} {dimensions}'
-                    )
-                    if path == '/ci-long-content/':
-                        # Computed CSS proves the theme.json rule is active on
-                        # the rendered frontend, rather than only in a file.
-                        styles = page.evaluate("""() => {
-                            const title = document.querySelector('.wp-block-post-title');
-                            const content = document.querySelector('.wp-block-post-content');
-                            const table = content?.querySelector('.wp-block-table');
-                            return title && content && table ? {
-                                title: getComputedStyle(title).overflowWrap,
-                                content: getComputedStyle(content).overflowWrap,
-                                tableOverflow: getComputedStyle(table).overflowX
-                            } : null;
-                        }""")
-                        assert styles == {
-                            'title': 'anywhere', 'content': 'anywhere', 'tableOverflow': 'auto'
-                        }, f'Missing frontend theme.json reflow CSS: {width}px {styles}'
-                        assert 'UnbrokenTitle' in page.locator('h1').inner_text()
-                        assert 'UnbrokenHeading' in page.locator('.wp-block-post-content h2').inner_text()
-                        assert 'UnbrokenWord' in page.locator('.wp-block-post-content').inner_text()
-            assert not errors, f'Uncaught browser JavaScript errors: {errors}'
-            print('PASS: routes, 7 viewport widths, rendered theme.json CSS, long content and WooCommerce reflow (when enabled)')
-        finally:
-            browser.close()
+        for name in ENGINES:
+            browser = getattr(playwright, name).launch(headless=True)
+            check_engine(browser, name)
 
 
 if __name__ == '__main__':

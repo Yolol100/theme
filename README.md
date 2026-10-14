@@ -1,4 +1,4 @@
-# Webactueel Block Starter 1.0.4
+# Webactueel Block Starter 1.0.5
 
 Minimal, independent native WordPress block theme for new projects. The theme
 contains 12 installable files, 6 block templates, 3 reusable template parts,
@@ -39,9 +39,9 @@ never add backend or payment code to the theme ZIP.
 
 ## Release evidence and limits
 
-- Baseline exact installation ZIP SHA-256: `ac880c7b65c95b30d0b24429172476bc32f1173c86ab46a3154fa1bb5e0a9550`.
+- Previous 1.0.4 installation ZIP (rollback) SHA-256: `ac880c7b65c95b30d0b24429172476bc32f1173c86ab46a3154fa1bb5e0a9550`.
 - Every build must verify its own `dist/SHA256SUMS.txt` and link to its commit/run.
-- Installable filename: `Webactueel-Block-Starter-1.0.4-STAGING.zip`.
+- Installable filename: `Webactueel-Block-Starter-1.0.5-STAGING.zip`.
 - See `docs/QA.md`, `docs/77-scenarios.json`, and `docs/STAGING-ACCEPTANCE.md`.
 - Human WCAG-EM 2.0, a real payment-provider sandbox and hosting rollback
   require a *separate actual staging environment and reviewer*. Use the

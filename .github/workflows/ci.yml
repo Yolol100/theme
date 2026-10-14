@@ -25,7 +25,7 @@ jobs:
           python3 - <<'PY'
           import zipfile
           from pathlib import Path
-          install = Path('Webactueel-Block-Starter-1.0.4-STAGING.zip')
+          install = Path('Webactueel-Block-Starter-1.0.5-STAGING.zip')
           with zipfile.ZipFile(install) as z:
               assert z.testzip() is None
               assert len(z.namelist()) == 12
@@ -36,7 +36,7 @@ jobs:
         run: |
           python3 scripts/validate_staging_acceptance.py \
             docs/staging-acceptance.example.json \
-            --zip dist/Webactueel-Block-Starter-1.0.4-STAGING.zip > /tmp/staging-gate.json
+            --zip dist/Webactueel-Block-Starter-1.0.5-STAGING.zip > /tmp/staging-gate.json
           python3 - <<'PYBLOCK'
           import json
           result = json.load(open('/tmp/staging-gate.json', encoding='utf-8'))
