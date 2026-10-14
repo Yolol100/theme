@@ -151,6 +151,16 @@ class ThemeTests(unittest.TestCase):
         for expected in ('.env','.env.*','*.log','node_modules/','dist/'):
             self.assertIn(expected,ignored)
 
+    def test_runtime_wp_cli_matches_wordpress_permissions(self):
+        """Regression: WordPress Debian and WP-CLI Alpine use different UIDs."""
+        compose=(ROOT/'tests/runtime/compose.yaml').read_text()
+        runner=(ROOT/'tests/runtime/run.sh').read_text()
+        self.assertIn('    user: "33:33"', compose)
+        self.assertIn('      HOME: /tmp', compose)
+        self.assertIn('run --rm -T cli wp "$@"', runner)
+        self.assertIn('exec -T wordpress test -f /var/www/html/wp-config.php', runner)
+        self.assertNotIn('wp core version >/dev/null 2>&1', runner)
+
     def test_packager_does_not_distribute_local_env_files(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)/'workspace'

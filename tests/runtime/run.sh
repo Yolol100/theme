@@ -3,7 +3,8 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 compose=(docker compose -f tests/runtime/compose.yaml)
-wp() { "${compose[@]}" run --rm -T cli "$@"; }
+# Invoke WP-CLI explicitly; do not depend on the image entrypoint guessing subcommands.
+wp() { "${compose[@]}" run --rm -T cli wp "$@"; }
 
 : "${WP_TARGET:=latest}"
 : "${ENABLE_WOO:=0}"
@@ -12,17 +13,23 @@ wp() { "${compose[@]}" run --rm -T cli "$@"; }
 python3 scripts/package.py
 "${compose[@]}" up --wait -d database wordpress
 
-# The WordPress image populates the shared WordPress volume on first start.
+# Probe the actual WordPress container instead of repeatedly starting WP-CLI.
 ready=0
 for attempt in $(seq 1 40); do
-  if wp core version >/dev/null 2>&1; then ready=1; break; fi
-  sleep 3
+  if "${compose[@]}" exec -T wordpress test -f /var/www/html/wp-load.php && \
+     "${compose[@]}" exec -T wordpress test -f /var/www/html/wp-config.php; then
+    ready=1
+    break
+  fi
+  sleep 2
 done
 if [ "$ready" != 1 ]; then
   "${compose[@]}" logs wordpress database
   echo 'WordPress files did not initialize' >&2
   exit 1
 fi
+# Fail with the real WP-CLI diagnostic rather than swallowing 40 iterations of errors.
+wp core version
 
 if [ "$WP_TARGET" != latest ]; then
   wp core download --version="$WP_TARGET" --force

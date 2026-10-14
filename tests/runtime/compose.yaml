@@ -31,11 +31,14 @@ services:
       - wordpress-data:/var/www/html
   cli:
     image: wordpress:cli-php8.3
+    # Alpine WP-CLI defaults to UID 82, whereas Debian WordPress writes as UID 33.
+    user: "33:33"
     profiles: [tools]
     depends_on:
       database:
         condition: service_healthy
     environment:
+      HOME: /tmp
       WORDPRESS_DB_HOST: database:3306
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress-ci
