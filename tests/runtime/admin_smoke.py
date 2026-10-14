@@ -153,7 +153,9 @@ def main():
                 # is semantic table markup and preservation of both authored cells.
                 table = page.locator('main .wp-block-table table').first
                 assert table.count() == 1, 'Saved Core table is not rendered as a table'
-                assert table.locator('td').count() >= 2, 'Saved table cells are absent'
+                assert table.locator('th, td').count() >= 2, (
+                    'Saved table cells are absent: ' + table.inner_html()[:1200]
+                )
                 assert 'CI Table First' in table.inner_text(), 'First cell did not survive save/reload'
                 assert 'CI Table Second' in table.inner_text(), 'Second cell did not survive save/reload'
                 assert page.locator('main .wp-block-list li').count() == 1
