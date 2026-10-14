@@ -44,15 +44,14 @@ class ThemeTests(unittest.TestCase):
         s=(THEME/'style.css').read_text()
         for term in ('Theme Name: Webactueel Starter','Version: 1.0.4','Requires at least: 6.6','Requires PHP: 8.3','Text Domain: webactueel-starter','License: GPL-2.0-or-later'):
             with self.subTest(term=term):self.assertIn(term,s)
-        self.assertIn('overflow-wrap: anywhere', s.split('*/',1)[1])
-        self.assertIn('overflow-x: auto', s.split('*/',1)[1])
+        # A block theme does not enqueue style.css body automatically. Keep it metadata-only.
+        self.assertEqual(s.split('*/',1)[1].strip(),'')
     def test_theme_long_word_and_table_reflow_guard(self):
-        css=(THEME/'style.css').read_text()
-        self.assertIn('.wp-block-post-content',css)
-        self.assertIn('.wp-block-post-title',css)
-        self.assertIn('overflow-wrap: anywhere',css)
-        self.assertIn('max-width: 100%',css)
-        self.assertIn('overflow-x: auto',css)
+        cfg=json.loads((THEME/'theme.json').read_text())
+        blocks=cfg['styles']['blocks']
+        self.assertEqual(blocks['core/post-title']['css'],'overflow-wrap: anywhere;')
+        self.assertEqual(blocks['core/post-content']['css'],'overflow-wrap: anywhere;')
+        self.assertEqual(blocks['core/table']['css'],'max-width: 100%; overflow-x: auto;')
 
     def test_theme_json_version_tokens_palette(self):
         cfg=json.loads((THEME/'theme.json').read_text())
