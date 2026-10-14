@@ -244,6 +244,10 @@ class ThemeTests(unittest.TestCase):
                       'core/table', 'core/list', 'core/list-item'):
             self.assertIn(block,admin)
         self.assertIn('getBlocks()',admin)
+        # Nested Core table cell tagName must be explicit, otherwise saved
+        # HTML contains an empty <tr> and plain text outside the table.
+        self.assertEqual(admin.count("tag: 'td', content: 'CI Table"), 2)
+        self.assertIn("table.locator('th, td').count() >= 2",admin)
         self.assertNotIn('payment-provider credentials',admin)
 
     def test_axe_results_are_advisory_not_wcag_certification(self):

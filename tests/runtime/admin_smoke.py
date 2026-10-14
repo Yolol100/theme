@@ -121,7 +121,12 @@ def main():
                             window.wp.blocks.createBlock('core/button', {text: 'CI Core Button', url: '/'})
                         ]),
                         window.wp.blocks.createBlock('core/table', {
-                            body: [{cells: [{content: 'CI Table First'}, {content: 'CI Table Second'}]}]
+                            // The nested cell shape is parsed from saved markup.
+                            // Explicit tag is required by core/table's save.js.
+                            body: [{cells: [
+                                {tag: 'td', content: 'CI Table First'},
+                                {tag: 'td', content: 'CI Table Second'}
+                            ]}]
                         }),
                         window.wp.blocks.createBlock('core/list', {}, [
                             window.wp.blocks.createBlock('core/list-item', {content: 'CI List Item'})
