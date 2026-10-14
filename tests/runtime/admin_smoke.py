@@ -60,8 +60,11 @@ def test_editor_edge_cases(page):
     assert empty_id and empty_id.isdigit() and invalid_id and invalid_id.isdigit()
     response=page.goto(BASE+'/ci-empty-page/', wait_until='domcontentloaded')
     assert response and response.status==200
-    assert 'CI Empty Page' in page.locator('main').inner_text()
-    assert page.locator('main .wp-block-post-content').inner_text().strip() == ''
+    # WordPress can omit the post-content wrapper entirely for a truly empty page.
+    # Check rendered semantics, not an incidental empty Core wrapper.
+    assert ' '.join(page.locator('main').inner_text().split()) == 'CI Empty Page', (
+        'Empty WordPress page rendered unexpected content: ' + page.locator('main').inner_text()
+    )
 
     response=page.goto(BASE+f'/wp-admin/post.php?post={invalid_id}&action=edit',
                        wait_until='domcontentloaded')
