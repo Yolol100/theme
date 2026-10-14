@@ -68,6 +68,9 @@ def main():
             }, indent=2) + '\n')
             issues = sum(len(x['violations']) for x in summaries)
             print(f'AXE ADVISORY: scanned {len(summaries)} routes; {issues} violations reported; human WCAG-EM still required')
+            for row in summaries:
+                for violation in row['violations']:
+                    print(f"AXE RULE: path={row['path']} id={violation['id']} impact={violation['impact']} nodes={violation['affected_nodes']}", flush=True)
             assert not any(row['violations'] for row in summaries), 'WCAG automated rule failure on theme pages'
         finally:
             browser.close()
