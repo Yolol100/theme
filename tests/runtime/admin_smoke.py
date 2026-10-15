@@ -148,7 +148,7 @@ def test_site_editor_api_roundtrip(page):
         changed=part['original']+f'\n<!-- wp:paragraph --><p>{marker}</p><!-- /wp:paragraph -->'
         try:
             result=page.evaluate('''async ({id,content}) => {
-                const path='/wp/v2/template-parts/'+encodeURIComponent(id);
+                const path='/wp/v2/template-parts/'+id;
                 const updated=await wp.apiFetch({path,method:'POST',data:{content}});
                 const fetched=await wp.apiFetch({path:path+'?context=edit'});
                 return {id:updated.id, content:fetched.content?.raw};
@@ -164,7 +164,7 @@ def test_site_editor_api_roundtrip(page):
             page.goto(BASE+'/wp-admin/site-editor.php',wait_until='domcontentloaded')
             page.wait_for_function("() => Boolean(window.wp && wp.apiFetch)",timeout=45000)
             restored=page.evaluate('''async (id) => {
-                const path='/wp/v2/template-parts/'+encodeURIComponent(id);
+                const path='/wp/v2/template-parts/'+id;
                 const describe=e=>({code:e?.code??null,message:e?.message??String(e),
                     status:e?.data?.status??null});
                 let response, baseline, deletionError=null, baselineError=null;
