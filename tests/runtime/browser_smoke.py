@@ -5,7 +5,6 @@ A route check is not a substitute for Gutenberg save/reload, WCAG-EM, or payment
 import os
 import re
 from urllib.parse import urlsplit
-from playwright.sync_api import sync_playwright
 
 BASE = os.environ.get('BASE_URL', 'http://localhost:8080').rstrip('/')
 WOO = os.environ.get('ENABLE_WOO', '0') == '1'
@@ -119,6 +118,8 @@ def check_engine(browser, name):
 
 
 def main():
+    from playwright.sync_api import sync_playwright
+
     assert ENGINES and set(ENGINES).issubset({'chromium', 'firefox', 'webkit'}), ENGINES
     with sync_playwright() as playwright:
         for name in ENGINES:
