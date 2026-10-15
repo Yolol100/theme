@@ -46,6 +46,36 @@ class StagingReceiptTests(unittest.TestCase):
         self.assertEqual(result['status'], 'INVALID')
         self.assertTrue(any('external provider' in e for e in result['errors']))
 
+    def test_invalid_receipt_types_and_dates_never_crash(self):
+        base = copy.deepcopy(EXAMPLE)
+        base['staging_url'] = 'https://staging.example.test'
+        base['artifact']['commit_sha'] = 'a' * 40
+        gate = base['gates']['responsive_devices']
+        gate.update({
+            'status': 'PASS', 'reviewer': 'Human QA reviewer',
+            'observed_at': '2026-10-15T10:00:00Z', 'evidence': ['report-123456'],
+            'widths_checked': [320, 375, 390, 768, 1024, 1440, 1920],
+            'actual_zoom_200_percent': True,
+        })
+        cases = (
+            (('gates', 'responsive_devices', 'observed_at'), '2026-99-99T88:77:66Z'),
+            (('staging_url',), 'https://bad host.example.test'),
+            (('artifact', 'theme_sha256'), 8),
+            (('gates', 'responsive_devices', 'widths_checked'), None),
+            (('gates', 'responsive_devices', 'status'), ['PASS']),
+        )
+        for keypath, value in cases:
+            with self.subTest(keypath=keypath):
+                packet = copy.deepcopy(base)
+                target = packet
+                for key in keypath[:-1]:
+                    target = target[key]
+                target[keypath[-1]] = value
+                result = validate(packet)
+                self.assertEqual(result['status'], 'INVALID')
+                self.assertTrue(result['errors'])
+                self.assertFalse(result['production_go_certified'])
+
     def test_zip_digest_mismatch_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             zip_file = Path(tmp) / 'sample.zip'

@@ -3,11 +3,29 @@
 A route check is not a substitute for Gutenberg save/reload, WCAG-EM, or payments.
 """
 import os
+import re
+from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright
 
 BASE = os.environ.get('BASE_URL', 'http://localhost:8080').rstrip('/')
 WOO = os.environ.get('ENABLE_WOO', '0') == '1'
 ENGINES = tuple(x.strip() for x in os.environ.get('BROWSER_ENGINES', 'chromium').split(',') if x.strip())
+
+PHP_DIAGNOSTIC = re.compile(
+    r'(?:<b>\s*)?(?:PHP\s+)?(?:Warning|Notice|Deprecated|Fatal error|Parse error)'
+    r'(?:\s*</b>)?\s*:', re.I
+)
+ASSET_EXTENSIONS = ('.css', '.js', '.mjs', '.png', '.jpg', '.jpeg', '.webp', '.gif',
+                    '.svg', '.woff', '.woff2', '.ttf', '.ico')
+
+
+def assert_no_php_diagnostics(markup):
+    assert PHP_DIAGNOSTIC.search(markup) is None, 'PHP debug diagnostic leaked into frontend HTML'
+
+
+def asset_request(url):
+    return (urlsplit(url).netloc == urlsplit(BASE).netloc and
+            urlsplit(url).path.lower().endswith(ASSET_EXTENSIONS))
 
 
 def verify(page, path, status=200, includes=()):
@@ -22,13 +40,19 @@ def verify(page, path, status=200, includes=()):
         assert expected in text, f'{path}: missing fixture text {expected!r}'
     assert page.locator('link[rel="canonical"]').count() <= 1, f'{path}: duplicate canonicals'
     assert 'There has been a critical error' not in text
+    assert_no_php_diagnostics(page.content())
 
 
 def check_engine(browser, name):
     errors = []
+    asset_failures = []
     try:
         page = browser.new_page(viewport={'width': 1280, 'height': 800})
         page.on('pageerror', lambda error: errors.append(str(error)))
+        page.on('response', lambda response: asset_failures.append((response.status, response.url))
+                if response.status >= 400 and asset_request(response.url) else None)
+        page.on('requestfailed', lambda request: asset_failures.append(('network', request.url))
+                if asset_request(request.url) and 'ERR_ABORTED' not in (request.failure or '') else None)
         verify(page, '/', includes=('Latest posts', 'CI Archive Article'))
         verify(page, '/starter-page/', includes=('Starter Page', 'A visible example page'))
         verify(page, '/example-ci-post/', includes=('Example CI Post', 'Testing the Webactueel Starter'))
@@ -88,6 +112,7 @@ def check_engine(browser, name):
                     f'{name}: theme.json site-title wrapping not applied at {width}px'
                 )
         assert not errors, f'Uncaught browser JavaScript errors: {errors}'
+        assert not asset_failures, f'Same-origin assets missing or failed to load: {asset_failures[:8]}'
         print(f'PASS [{name}]: routes, 7 viewport widths, rendered theme.json CSS, long content and WooCommerce reflow (when enabled)')
     finally:
         browser.close()

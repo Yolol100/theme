@@ -101,13 +101,22 @@ PYVERIFY
 wp option update show_on_front posts
 curl --fail --silent --show-error --location 'http://localhost:8080/?s=Example' > /dev/null
 
+# Runtime receipts must reflect executed checks, not only requested profiles.
+BROWSER_CHECKS_VERIFIED=0
+EDITOR_CHECKS_VERIFIED=0
+SITE_EDITOR_API_VERIFIED=0
 if [ "$RUN_BROWSER" = 1 ]; then
   BASE_URL=http://localhost:8080 ENABLE_WOO="$ENABLE_WOO" python3 tests/runtime/browser_smoke.py
+  BROWSER_CHECKS_VERIFIED=1
   if [ "${PHP_VERSION:-8.3}" = 8.3 ] && [ "$ENABLE_WOO" = 0 ]; then
     RUN_EDITOR_E2E=1 EDITOR_TEST_PAGE_ID="$page_id" \
       EDITOR_EMPTY_PAGE_ID="$empty_page_id" EDITOR_INVALID_PAGE_ID="$invalid_page_id" \
       RUN_SITE_EDITOR_API="$([ "$WP_TARGET" = latest ] && echo 1 || echo 0)" \
       BASE_URL=http://localhost:8080 python3 tests/runtime/admin_smoke.py
+    EDITOR_CHECKS_VERIFIED=1
+    if [ "$WP_TARGET" = latest ]; then
+      SITE_EDITOR_API_VERIFIED=1
+    fi
   else
     BASE_URL=http://localhost:8080 python3 tests/runtime/admin_smoke.py
   fi
@@ -146,7 +155,28 @@ if [ "$WP_TARGET" = latest ] && [ "${PHP_VERSION:-8.3}" = 8.3 ]; then
 fi
 # Test optional ACF only after the original no-ACF regression suite has passed.
 bash tests/runtime/acf_smoke.sh
+# Inspect the real WordPress debug log, not only the rendered pages.
+# Never upload raw PHP log lines: paths, order data and secrets could appear.
+python3 - <<'PYDEBUG'
+import json, re, subprocess
+from pathlib import Path
+command = ['docker', 'compose', '-f', 'tests/runtime/compose.yaml', 'exec', '-T',
+           'wordpress', 'sh', '-c',
+           'test ! -f /var/www/html/wp-content/debug.log || cat /var/www/html/wp-content/debug.log']
+result = subprocess.run(command, capture_output=True, text=True, check=True)
+entries = [line for line in result.stdout.splitlines()
+           if re.search(r'PHP (?:Warning|Notice|Deprecated|Fatal|Parse)|Uncaught (?:Exception|Error)', line, re.I)]
+Path('reports').mkdir(exist_ok=True)
+Path('reports/php-debug-audit.json').write_text(json.dumps({
+    'scope': 'disposable WordPress wp-content/debug.log',
+    'assertion': 'no PHP warnings, notices, deprecations, fatals or uncaught errors',
+    'finding_count': len(entries), 'status': 'FAIL' if entries else 'PASS',
+}, indent=2) + '\n')
+assert not entries, f'WordPress generated {len(entries)} PHP debug diagnostics; inspect isolated site logs privately'
+print('PASS: PHP debug log contains no warning, notice, deprecated, fatal or uncaught error')
+PYDEBUG
 mkdir -p reports
+export BROWSER_CHECKS_VERIFIED EDITOR_CHECKS_VERIFIED SITE_EDITOR_API_VERIFIED
 python3 - <<'PYRECEIPT'
 import hashlib, json, os, pathlib
 file = pathlib.Path('dist/Webactueel-Block-Starter-1.0.5-STAGING.zip')
@@ -163,8 +193,9 @@ receipt = {
     'external_payment_provider_sandbox': 'NOT_RUN',
     'hosting_restore': 'NOT_RUN',
     'human_site_editor_ui_acceptance': 'NOT_RUN',
-    'gutenberg_store_edge_cases': 'PASS' if os.environ.get('PHP_VERSION', '8.3') == '8.3' and os.environ.get('ENABLE_WOO') == '0' else 'NOT_RUN',
-    'site_editor_template_parts_rest_roundtrip': 'PASS' if os.environ.get('WP_TARGET', 'latest') == 'latest' and os.environ.get('PHP_VERSION', '8.3') == '8.3' and os.environ.get('ENABLE_WOO') == '0' else 'NOT_RUN',
+    'browser_route_and_reflow_checks': 'PASS' if os.environ.get('BROWSER_CHECKS_VERIFIED') == '1' else 'NOT_RUN',
+    'gutenberg_store_edge_cases': 'PASS' if os.environ.get('EDITOR_CHECKS_VERIFIED') == '1' else 'NOT_RUN',
+    'site_editor_template_parts_rest_roundtrip': 'PASS' if os.environ.get('SITE_EDITOR_API_VERIFIED') == '1' else 'NOT_RUN',
     'actual_theme_switch_content_preservation': 'PASS' if os.environ.get('WP_TARGET', 'latest') == 'latest' and os.environ.get('ENABLE_WOO') == '0' else 'NOT_RUN',
     'manual_screenreader_and_browser_zoom': 'NOT_RUN',
 }

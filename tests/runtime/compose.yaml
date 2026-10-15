@@ -27,6 +27,7 @@ services:
       WORDPRESS_DB_PASSWORD: wordpress-ci
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DEBUG: "1"
+      WORDPRESS_CONFIG_EXTRA: "define('WP_DEBUG_LOG', true);"
     volumes:
       - wordpress-data:/var/www/html
   cli:

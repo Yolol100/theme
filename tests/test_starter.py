@@ -52,6 +52,66 @@ class ThemeTests(unittest.TestCase):
         self.assertIn('<!-- /wp:navigation -->',markup)
         self.assertNotIn('<!-- wp:navigation {"overlayMenu":"mobile"} /-->',markup)
 
+    def test_browser_checks_reject_php_diagnostics_and_broken_local_assets(self):
+        import importlib.util
+        from unittest.mock import patch
+        source = ROOT / 'tests/runtime/browser_smoke.py'
+        spec = importlib.util.spec_from_file_location('starter_browser_smoke', source)
+        with patch.dict('sys.modules', {}):
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+        with self.assertRaises(AssertionError):
+            module.assert_no_php_diagnostics('<br/><b>Warning</b>: Undefined variable in test.php on line 1')
+        with self.assertRaises(AssertionError):
+            module.assert_no_php_diagnostics('PHP Warning: test in test.php on line 1')
+        module.assert_no_php_diagnostics('<p>Regular sample page content</p>')
+        self.assertTrue(module.asset_request('http://localhost:8080/wp-content/uploads/missing.png'))
+        self.assertTrue(module.asset_request('http://localhost:8080/wp-includes/js/core.js?v=1'))
+        self.assertFalse(module.asset_request('http://localhost:8080/non-existent-page/'))
+        self.assertFalse(module.asset_request('https://example.org/missing.png'))
+
+    def test_editor_runtime_receipt_never_claims_skipped_work(self):
+        source = (ROOT / 'tests/runtime/run.sh').read_text()
+        self.assertIn('BROWSER_CHECKS_VERIFIED=0', source)
+        self.assertIn('EDITOR_CHECKS_VERIFIED=0', source)
+        self.assertIn('SITE_EDITOR_API_VERIFIED=0', source)
+        self.assertIn('BROWSER_CHECKS_VERIFIED=1', source)
+        self.assertIn('EDITOR_CHECKS_VERIFIED=1', source)
+        self.assertIn('SITE_EDITOR_API_VERIFIED=1', source)
+        self.assertIn("os.environ.get('EDITOR_CHECKS_VERIFIED') == '1'", source)
+        self.assertIn("os.environ.get('SITE_EDITOR_API_VERIFIED') == '1'", source)
+        self.assertIn('php-debug-audit.json', source)
+
+    def test_actual_receipt_script_distinguishes_run_and_skip(self):
+        import os
+        import sys
+        runner = (ROOT / 'tests/runtime/run.sh').read_text()
+        script = runner.split("python3 - <<'PYRECEIPT'\n", 1)[1].split('\nPYRECEIPT', 1)[0]
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            (base / 'dist').mkdir()
+            (base / 'reports').mkdir()
+            (base / 'dist/Webactueel-Block-Starter-1.0.5-STAGING.zip').write_bytes(b'fixture')
+            for values, expected in (
+                ({}, 'NOT_RUN'),
+                ({'BROWSER_CHECKS_VERIFIED': '1', 'EDITOR_CHECKS_VERIFIED': '1',
+                  'SITE_EDITOR_API_VERIFIED': '1'}, 'PASS'),
+            ):
+                environment = {**os.environ, 'WP_TARGET': 'latest',
+                               'PHP_VERSION': '8.3', 'ENABLE_WOO': '0',
+                               'RUN_BROWSER': '0',
+                               'BROWSER_CHECKS_VERIFIED': '0',
+                               'EDITOR_CHECKS_VERIFIED': '0',
+                               'SITE_EDITOR_API_VERIFIED': '0', **values}
+                proc = subprocess.run([sys.executable, '-c', script], cwd=base,
+                                      env=environment, capture_output=True, text=True)
+                self.assertEqual(proc.returncode, 0, proc.stderr)
+                receipt = json.loads((base / 'reports/test-receipt.json').read_text())
+                for field in ('browser_route_and_reflow_checks',
+                              'gutenberg_store_edge_cases',
+                              'site_editor_template_parts_rest_roundtrip'):
+                    self.assertEqual(receipt[field], expected, field)
+
     def test_all_viewports_and_rendered_theme_json_css_are_checked(self):
         browser=(ROOT/'tests/runtime/browser_smoke.py').read_text()
         fixture=(ROOT/'tests/runtime/run.sh').read_text()
