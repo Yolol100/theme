@@ -50,3 +50,12 @@ class AcfContractTests(unittest.TestCase):
             self.assertFalse(re.search(r'\b(toont|geen|juiste|gecontroleerd|behouden|inhoud|ontbreken)\b',
                                        case['acceptance_assertion'], re.I))
             self.assertTrue(case['acceptance_assertion'].isascii())
+
+    def test_theme_switch_uses_a_compatible_installed_theme(self):
+        script = (ROOT / 'tests/runtime/acf_smoke.sh').read_text()
+        self.assertIn('is_wp_version_compatible', script)
+        self.assertIn('is_php_version_compatible', script)
+        self.assertIn('$theme->errors()', script)
+        self.assertIn('No compatible alternate theme is installed.', script)
+        self.assertIn("'alternate_theme': os.environ['ACF_SWITCH_THEME']", script)
+        self.assertNotIn('wp theme list --status=inactive --field=name', script)

@@ -52,7 +52,21 @@ wp eval-file /workspace/acf_smoke.php verify > reports/acf-fixture.json
 check_frontend active
 
 # Changing presentation must not erase the stored field schema or values.
-alternative="$(wp theme list --status=inactive --field=name | awk 'NF {print; exit}')"
+# The current Docker image can retain themes that require a newer WordPress
+# than the minimum-version profile. Choose only a compatible installed theme.
+alternative="$(wp eval '
+$themes = wp_get_themes();
+ksort( $themes );
+foreach ( $themes as $slug => $theme ) {
+    if ( $slug !== get_stylesheet() && ! $theme->errors()
+        && is_wp_version_compatible( $theme->get( "RequiresWP" ) )
+        && is_php_version_compatible( $theme->get( "RequiresPHP" ) ) ) {
+        WP_CLI::line( $slug );
+        return;
+    }
+}
+WP_CLI::error( "No compatible alternate theme is installed." );
+')"
 [ -n "$alternative" ]
 wp theme activate "$alternative"
 wp eval-file /workspace/acf_smoke.php verify > reports/acf-fixture.json
@@ -67,7 +81,7 @@ wp eval-file /workspace/acf_smoke.php cleanup
 wp plugin deactivate advanced-custom-fields
 wp plugin delete advanced-custom-fields
 
-python3 - <<'PY'
+ACF_SWITCH_THEME="$alternative" python3 - <<'PY'
 import hashlib, json, os
 from pathlib import Path
 fixture = json.loads(Path('reports/acf-fixture.json').read_text())
@@ -76,6 +90,7 @@ report = {
     'commit_sha': os.environ.get('GITHUB_SHA', ''),
     'theme_sha256': hashlib.sha256(Path('dist/Webactueel-Block-Starter-1.0.5-STAGING.zip').read_bytes()).hexdigest(),
     'versions': {k: v for k, v in fixture.items() if k.endswith('_version')},
+    'alternate_theme': os.environ['ACF_SWITCH_THEME'],
     'checks': ['field_group_persistence', 'page_location_rules', 'per_page_values',
                'server_side_block_bindings', 'restricted_field_not_exposed',
                'empty_value_no_fatal', 'value_update_readback',
