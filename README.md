@@ -9,6 +9,18 @@ checkout overrides, sample layouts or private information ship in the theme.
 **Not a drop-in upgrade for Webactueel Universal 1.0.4.** Different slug and
 project scope: no automatic migration of an existing site.
 
+## Why this project matters
+
+A new client site should not need an oversized starter theme or hidden dependencies. This project keeps the installable block theme small and delegates content editing to WordPress Core and shop behavior to WooCommerce.
+
+**What I built:** a reproducibly packaged block-theme starter with native templates and parts, a `theme.json` configuration and automated installation/smoke-test workflows. The public repository contains its source, tests and staging-acceptance criteria.
+
+**Engineering decisions:** keep site-specific functionality outside the theme; test the exact packaged ZIP across isolated WordPress/PHP configurations; require separate human staging acceptance before a client release.
+
+**Technical reviewers:** see [QA and test scope](docs/QA.md), [staging acceptance](docs/STAGING-ACCEPTANCE.md) and [the GitHub Actions workflows](.github/workflows/). These are inspectable engineering checks, not proof of real-client deployment or full accessibility conformance.
+
+**Developer:** [Andrew Baeten — WordPress Developer & Web Designer](https://github.com/Yolol100) · [Website portfolio](https://andrewbaeten.nl/category/cases)
+
 ## Build and test
 
 ```bash
