@@ -21,6 +21,13 @@ A new client site should not need an oversized starter theme or hidden dependenc
 
 **Developer:** [Andrew Baeten — WordPress Developer & Web Designer](https://github.com/Yolol100) · [Website portfolio](https://andrewbaeten.nl/category/cases)
 
+## Architecture and optional custom fields
+
+See [the architecture and integration guide](docs/ARCHITECTURE.md) for file
+ownership, naming, ACF per-page fields and the limits of a general starter.
+ACF is optional; field schemas and frontend bindings must be configured for each
+project. The CI tests ACF Free separately and does not certify ACF PRO features.
+
 ## Build and test
 
 ```bash

@@ -48,8 +48,7 @@ def check_engine(browser, name):
             for path in ('/shop/', '/cart/', '/checkout/', '/product/ci-test-product/'):
                 verify(page, path)
             verify(page, '/product/ci-test-product/', includes=('CI Test Product',))
-        # Check the full content fixture, not only the empty-ish homepage.
-        # A table may scroll internally; the document itself must never grow.
+        # Tables may scroll inside their wrapper, but the document must fit.
         paths = ('/', '/starter-page/', '/example-ci-post/', '/ci-long-content/')
         if WOO:
             paths += ('/shop/', '/cart/', '/checkout/', '/product/ci-test-product/')
@@ -65,8 +64,7 @@ def check_engine(browser, name):
                     f'Horizontal document overflow: {width}px {path} {dimensions}'
                 )
                 if path == '/ci-long-content/':
-                    # Computed CSS proves the theme.json rule is active on
-                    # the rendered frontend, rather than only in a file.
+                    # Check applied styles, not just the theme.json source.
                     styles = page.evaluate("""() => {
                         const title = document.querySelector('.wp-block-post-title');
                         const content = document.querySelector('.wp-block-post-content');

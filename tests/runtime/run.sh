@@ -3,14 +3,14 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 compose=(docker compose -f tests/runtime/compose.yaml)
-# Invoke WP-CLI explicitly; do not depend on the image entrypoint guessing subcommands.
+# Use the same WP-CLI entrypoint for every test command.
 wp() { "${compose[@]}" run --rm -T cli wp "$@"; }
 
 : "${WP_TARGET:=latest}"
 : "${ENABLE_WOO:=0}"
 : "${RUN_BROWSER:=1}"
 
-# Use the single archive built by the workflow package job, not a new per-matrix build.
+# Install the archive from the package job in every matrix profile.
 (cd dist && sha256sum --check SHA256SUMS.txt)
 printf 'RUNTIME_THEME_SHA256=%s\n' "$(sha256sum dist/Webactueel-Block-Starter-1.0.5-STAGING.zip | cut -d' ' -f1)"
 "${compose[@]}" up --wait -d database wordpress
@@ -30,7 +30,7 @@ if [ "$ready" != 1 ]; then
   echo 'WordPress files did not initialize' >&2
   exit 1
 fi
-# Fail with the real WP-CLI diagnostic rather than swallowing 40 iterations of errors.
+# Report WP-CLI startup errors before seeding the database.
 wp core version
 
 if [ "$WP_TARGET" != latest ]; then
@@ -50,7 +50,7 @@ wp option update posts_per_page 5
 wp eval 'for ($i=1; $i<=12; $i++) { wp_insert_post(array("post_title" => "CI Archive Article " . $i, "post_content" => "Synthetic article number " . $i, "post_status" => "publish", "post_type" => "post")); }'
 page_id="$(wp post create --post_type=page --post_title='Starter Page' \
     --post_content='A visible example page for CI testing.' --post_status=publish --porcelain | tr -d '\r')"
-# Separate disposable fixtures so the normal page and Gutenberg roundtrip stay unchanged.
+# Keep empty and invalid-block cases separate from the main editor fixture.
 empty_page_id="$(wp post create --post_type=page --post_name=ci-empty-page \
     --post_title='CI Empty Page' --post_content='' --post_status=publish --porcelain | tr -d '\r')"
 invalid_page_id="$(wp post create --post_type=page --post_name=ci-invalid-block \
@@ -61,7 +61,7 @@ wp option update blogname 'CI-UnbrokenBrand'$(printf 'B%.0s' {1..110})
 # Stress-test long unbroken content, headings and a wide Core table at small widths.
 wp post create --post_type=page --post_name='ci-long-content' --post_title='CI Long Content UnbrokenTitleBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB' \
     --post_content='<!-- wp:heading --><h2 class="wp-block-heading">UnbrokenHeadingCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC</h2><!-- /wp:heading --><!-- wp:paragraph --><p>UnbrokenWordAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</p><!-- /wp:paragraph --><!-- wp:table --><figure class="wp-block-table"><table><tbody><tr><td>Long table cell one</td><td>Long table cell two</td></tr></tbody></table></figure><!-- /wp:table -->' --post_status=publish
-# Synthetic, disposable authorisation fixture: no human or production account.
+# This editor account exists only in the disposable test database.
 if [ "${PHP_VERSION:-8.3}" = 8.3 ] && [ "$ENABLE_WOO" = 0 ]; then
   wp user create ci_editor ci-editor@example.test --role=editor \
     --user_pass='ci-editor-disposable-password'
@@ -144,6 +144,8 @@ fi
 if [ "$WP_TARGET" = latest ] && [ "${PHP_VERSION:-8.3}" = 8.3 ]; then
   BASE_URL=http://localhost:8080 ENABLE_WOO="$ENABLE_WOO" python3 tests/runtime/axe_audit.py
 fi
+# Test optional ACF only after the original no-ACF regression suite has passed.
+bash tests/runtime/acf_smoke.sh
 mkdir -p reports
 python3 - <<'PYRECEIPT'
 import hashlib, json, os, pathlib
@@ -155,6 +157,8 @@ receipt = {
     'php_target': os.environ.get('PHP_VERSION', '8.3'),
     'woocommerce_enabled': os.environ.get('ENABLE_WOO') == '1',
     'payments_or_wcag_certified': False,
+    'acf_free_receipt': 'acf-audit.json',
+    'acf_pro': 'NOT_RUN',
     'human_wcag_em': 'NOT_RUN',
     'external_payment_provider_sandbox': 'NOT_RUN',
     'hosting_restore': 'NOT_RUN',

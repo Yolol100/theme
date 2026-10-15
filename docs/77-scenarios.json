@@ -11,7 +11,7 @@
       "scenario": "Clean WordPress default blog home",
       "priority": "P1",
       "baseline_status": "SMOKE_PASS",
-      "acceptance_assertion": "Homepage / toont recente berichten in juiste volgorde en geen PHP/browserfouten",
+      "acceptance_assertion": "The homepage lists recent posts in the correct order without PHP or browser errors.",
       "human_or_target_site_required": false
     },
     {
@@ -20,7 +20,7 @@
       "scenario": "Static homepage with assigned page content",
       "priority": "P1",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "Statische pagina-inhoud en H1 zijn zichtbaar na toewijzing; blogcontent niet op voorpagina",
+      "acceptance_assertion": "The assigned static page content and H1 are visible; blog posts do not replace the front page.",
       "human_or_target_site_required": false
     },
     {
@@ -29,7 +29,7 @@
       "scenario": "Separate blog posts page",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Pagina \"Blog\" als posts-page; artikelen en paginering verschijnen op die URL",
+      "acceptance_assertion": "The assigned Blog page displays articles and pagination at its own URL.",
       "human_or_target_site_required": false
     },
     {
@@ -38,7 +38,7 @@
       "scenario": "Published page and very long body",
       "priority": "P1",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "Lange pagina bevat de volledige tekst zonder afkappen/overflow",
+      "acceptance_assertion": "A long page displays its full text without clipping or unintended horizontal overflow.",
       "human_or_target_site_required": false
     },
     {
@@ -47,7 +47,7 @@
       "scenario": "Single post with images, table and embeds",
       "priority": "P1",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "Artikel toont afbeelding, alt, tabel en embed zonder console/HTTP-errors",
+      "acceptance_assertion": "A post displays its image, alternative text, table and embed without console or HTTP errors.",
       "human_or_target_site_required": false
     },
     {
@@ -56,7 +56,7 @@
       "scenario": "Category, tag, author and date archives",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Categorie, tag, auteur en datum tonen juiste posts/H1 en HTTP 200",
+      "acceptance_assertion": "Category, tag, author and date archives display the correct posts and H1 with HTTP 200.",
       "human_or_target_site_required": false
     },
     {
@@ -65,7 +65,7 @@
       "scenario": "Search with results",
       "priority": "P1",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "Zoekterm via formulier ingediend, resultaat- en querytekst zichtbaar",
+      "acceptance_assertion": "Submitting the search form displays matching results and the submitted query.",
       "human_or_target_site_required": false
     },
     {
@@ -74,7 +74,7 @@
       "scenario": "Search with no results",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Niet-bestaande term toont toegankelijk expliciet leeg-resultaat",
+      "acceptance_assertion": "A query with no matches displays an explicit, accessible empty-results message.",
       "human_or_target_site_required": false
     },
     {
@@ -83,7 +83,7 @@
       "scenario": "Empty archives",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Leeg archief geeft juiste context/geen kapotte query",
+      "acceptance_assertion": "An empty archive preserves its context without a broken query.",
       "human_or_target_site_required": false
     },
     {
@@ -92,7 +92,7 @@
       "scenario": "Pagination with more than one page",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Meer dan 1 pagina: vorige/volgende/nummers bevatten juiste posts",
+      "acceptance_assertion": "Previous, next and numbered pagination links display the correct posts across multiple pages.",
       "human_or_target_site_required": false
     },
     {
@@ -101,7 +101,7 @@
       "scenario": "Unknown URL returns real 404 status",
       "priority": "P1",
       "baseline_status": "SMOKE_PASS",
-      "acceptance_assertion": "Onbekende URL geeft 404 en hersteloptie, niet enkel lege body",
+      "acceptance_assertion": "An unknown URL returns HTTP 404 and a recovery option rather than an empty body.",
       "human_or_target_site_required": false
     },
     {
@@ -110,7 +110,7 @@
       "scenario": "Custom post type fallback where installed",
       "priority": "P2",
       "baseline_status": "N/A_CI",
-      "acceptance_assertion": "Alleen bij sites met CPT: fallback bevat juiste titel/content; elders N/A gemotiveerd",
+      "acceptance_assertion": "On sites with custom post types, the fallback displays the correct title and content; otherwise record a justified N/A.",
       "human_or_target_site_required": false
     },
     {
@@ -119,7 +119,7 @@
       "scenario": "Very long title and unbroken words",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Ongebroken woord/lange titel is leesbaar bij 320px en 200% zoom",
+      "acceptance_assertion": "Unbroken words and long titles remain readable at 320px and 200% browser zoom.",
       "human_or_target_site_required": false
     },
     {
@@ -128,7 +128,7 @@
       "scenario": "Admin creates and saves page",
       "priority": "P0",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "Admin maakt pagina in Gutenberg; save\u2192reload\u2192front-end tekst gelijk",
+      "acceptance_assertion": "An administrator creates a Gutenberg page; saved, reloaded and frontend text match.",
       "human_or_target_site_required": false
     },
     {
@@ -137,7 +137,7 @@
       "scenario": "Editor creates and saves post",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Editorrol kan post opslaan/publiceren binnen rechten; geen admin-privileges",
+      "acceptance_assertion": "An editor can save and publish a post within their permissions without administrator privileges.",
       "human_or_target_site_required": false
     },
     {
@@ -146,7 +146,7 @@
       "scenario": "Site editor changes header/footer",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Header en footer wijzigen; opslaan, opnieuw openen en frontend tonen wijzigingen",
+      "acceptance_assertion": "Header and footer edits persist after saving and reopening and appear on the frontend.",
       "human_or_target_site_required": false
     },
     {
@@ -155,7 +155,7 @@
       "scenario": "Create navigation menu then reopen",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Navigatie-item opslaan, heropenen, desktop/mobile functionele bestemming",
+      "acceptance_assertion": "A saved navigation item survives reopening and reaches the correct destination on desktop and mobile.",
       "human_or_target_site_required": false
     },
     {
@@ -164,7 +164,7 @@
       "scenario": "Upload logo and reopen editor",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Logo upload, alt/afbeelding behouden na heropenen en op frontend zichtbaar",
+      "acceptance_assertion": "An uploaded logo and its alternative text survive reopening and appear on the frontend.",
       "human_or_target_site_required": true
     },
     {
@@ -173,7 +173,7 @@
       "scenario": "Change colors and typography then publish",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Kleur + typografie gewijzigd; opgeslagen, heropend en berekende CSS klopt",
+      "acceptance_assertion": "Saved color and typography changes survive reopening and match the computed frontend CSS.",
       "human_or_target_site_required": false
     },
     {
@@ -182,7 +182,7 @@
       "scenario": "Custom widths and full-width blocks stay consistent",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Wide/full alignment heeft editor/frontend parity bij verschillende breedtes",
+      "acceptance_assertion": "Wide and full-width alignments remain consistent between editor and frontend across viewport widths.",
       "human_or_target_site_required": true
     },
     {
@@ -191,7 +191,7 @@
       "scenario": "Gutenberg block save/reload validation",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Blokken toevoegen/bewerken en heropenen zonder invalid block warnings",
+      "acceptance_assertion": "Blocks can be added, edited and reopened without invalid-block warnings.",
       "human_or_target_site_required": false
     },
     {
@@ -200,7 +200,7 @@
       "scenario": "Editor changes retained after theme update",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Editorwijzigingen behouden na veilige update/rollback van dezelfde slug",
+      "acceptance_assertion": "Editor customizations survive a safe update and rollback of the same theme slug.",
       "human_or_target_site_required": true
     },
     {
@@ -209,7 +209,7 @@
       "scenario": "Theme switch back retains WP native content",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Native WP-inhoud blijft intact bij theme switch en terugschakelen",
+      "acceptance_assertion": "Native WordPress content remains intact after switching themes and switching back.",
       "human_or_target_site_required": true
     },
     {
@@ -218,7 +218,7 @@
       "scenario": "Viewport 320px",
       "priority": "P1",
       "baseline_status": "SMOKE_PASS",
-      "acceptance_assertion": "320px: geen horizontale scroll en menu/CTA/focus blijven bruikbaar",
+      "acceptance_assertion": "At 320px, no unintended horizontal scroll occurs and menus, calls to action and focus remain usable.",
       "human_or_target_site_required": false
     },
     {
@@ -227,7 +227,7 @@
       "scenario": "Viewport 375px",
       "priority": "P1",
       "baseline_status": "SMOKE_PASS",
-      "acceptance_assertion": "375px: responsive content en touch targets worden handmatig meegekeurd",
+      "acceptance_assertion": "At 375px, responsive content and touch targets also receive manual review.",
       "human_or_target_site_required": true
     },
     {
@@ -236,7 +236,7 @@
       "scenario": "Viewport 390px",
       "priority": "P1",
       "baseline_status": "SMOKE_PASS",
-      "acceptance_assertion": "390px: responsive content en touch targets worden handmatig meegekeurd",
+      "acceptance_assertion": "At 390px, responsive content and touch targets also receive manual review.",
       "human_or_target_site_required": true
     },
     {
@@ -245,7 +245,7 @@
       "scenario": "Viewport 768px",
       "priority": "P1",
       "baseline_status": "SMOKE_PASS",
-      "acceptance_assertion": "768px: layout/wide content/navigatie zijn correct",
+      "acceptance_assertion": "At 768px, layout, wide content and navigation render correctly.",
       "human_or_target_site_required": true
     },
     {
@@ -254,7 +254,7 @@
       "scenario": "Viewport 1024px",
       "priority": "P1",
       "baseline_status": "SMOKE_PASS",
-      "acceptance_assertion": "1024px: layout/wide content/navigatie zijn correct",
+      "acceptance_assertion": "At 1024px, layout, wide content and navigation render correctly.",
       "human_or_target_site_required": true
     },
     {
@@ -263,7 +263,7 @@
       "scenario": "Viewport 1440px",
       "priority": "P1",
       "baseline_status": "SMOKE_PASS",
-      "acceptance_assertion": "1440px: layout/wide content/navigatie zijn correct",
+      "acceptance_assertion": "At 1440px, layout, wide content and navigation render correctly.",
       "human_or_target_site_required": true
     },
     {
@@ -272,7 +272,7 @@
       "scenario": "Viewport 1920px",
       "priority": "P1",
       "baseline_status": "SMOKE_PASS",
-      "acceptance_assertion": "1920px: max-content widths/alignments zijn correct",
+      "acceptance_assertion": "At 1920px, maximum content widths and alignments render correctly.",
       "human_or_target_site_required": true
     },
     {
@@ -281,7 +281,7 @@
       "scenario": "Large text and 200 percent zoom",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "200% browserzoom en verhoogde tekst tonen geen verlies van content of focus",
+      "acceptance_assertion": "At 200% browser zoom and increased text size, no content or focus is lost.",
       "human_or_target_site_required": true
     },
     {
@@ -290,7 +290,7 @@
       "scenario": "RTL reading direction",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "RTL-tekst/navigatie/alignments hebben logische volgorde en geen clipping",
+      "acceptance_assertion": "RTL text, navigation and alignments preserve logical order without clipping.",
       "human_or_target_site_required": true
     },
     {
@@ -299,7 +299,7 @@
       "scenario": "Image/gallery large media reflow",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Galerij/grote afbeeldingen/tabellen schalen op 320-1920px zonder overloop",
+      "acceptance_assertion": "Galleries, large images and tables scale between 320px and 1920px without unintended overflow.",
       "human_or_target_site_required": true
     },
     {
@@ -308,7 +308,7 @@
       "scenario": "Keyboard navigation and visible focus",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Alle acties bereikbaar met Tab/Shift+Tab/Enter/Esc; focus indicator zichtbaar",
+      "acceptance_assertion": "All actions are reachable with Tab, Shift+Tab, Enter and Escape; focus is visible.",
       "human_or_target_site_required": true
     },
     {
@@ -317,7 +317,7 @@
       "scenario": "Mobile navigation expanded and closed by keyboard",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Menuknop opent/sluit met keyboard en Esc, focus beweegt logisch",
+      "acceptance_assertion": "The menu opens and closes by keyboard and Escape, with logical focus movement.",
       "human_or_target_site_required": true
     },
     {
@@ -326,7 +326,7 @@
       "scenario": "Screen reader landmarks and navigation",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Landmarks, labels, menu-state en volgorde hoorbaar; menselijke AT-waarneming",
+      "acceptance_assertion": "A human screen-reader review confirms landmarks, labels, menu state and reading order.",
       "human_or_target_site_required": true
     },
     {
@@ -335,7 +335,7 @@
       "scenario": "Search field accessible name",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Zoekinput heeft toegankelijke labelnaam en functionerende submit",
+      "acceptance_assertion": "The search input has an accessible name and a working submit action.",
       "human_or_target_site_required": false
     },
     {
@@ -344,7 +344,7 @@
       "scenario": "100-200 percent zoom reflow",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "100-200% zoom/320px reflow zonder verlies inhoud/functie",
+      "acceptance_assertion": "Zoom from 100% to 200% and reflow at 320px do not remove content or functionality.",
       "human_or_target_site_required": true
     },
     {
@@ -353,7 +353,7 @@
       "scenario": "Text/background and link hover/focus contrast",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Alle echte states incl hover/focus voldoen aan WCAG 2.2 AA",
+      "acceptance_assertion": "All actual states, including hover and focus, meet the applicable WCAG 2.2 AA contrast requirements.",
       "human_or_target_site_required": true
     },
     {
@@ -362,7 +362,7 @@
       "scenario": "Navigation touch targets",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Interactieve doelen voldoen aan relevante 2.2 SC 2.5.8 uitzonderingen",
+      "acceptance_assertion": "Interactive targets meet WCAG 2.2 SC 2.5.8, including its applicable exceptions.",
       "human_or_target_site_required": true
     },
     {
@@ -371,7 +371,7 @@
       "scenario": "Reduced motion with Core blocks",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Essenti\u00eble animaties zijn uitgeschakeld/aangepast indien aanwezig",
+      "acceptance_assertion": "Where animation is present, reduced-motion preferences are respected without losing essential functionality.",
       "human_or_target_site_required": true
     },
     {
@@ -380,7 +380,7 @@
       "scenario": "Logo click navigates home",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Site-logo klikt naar home en focuseert/labelt correct",
+      "acceptance_assertion": "The site logo links to the homepage with an appropriate accessible name and focus behavior.",
       "human_or_target_site_required": false
     },
     {
@@ -389,7 +389,7 @@
       "scenario": "Navigation menu items and dropdowns work",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Navigation links/dropdowns keyboard/mouse openen en navigeren",
+      "acceptance_assertion": "Navigation links and dropdowns work with both keyboard and pointer input.",
       "human_or_target_site_required": true
     },
     {
@@ -398,7 +398,7 @@
       "scenario": "Search submit navigates to results",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Getypte query + Enter/submit leidt naar zoekresultaten met betekenisvolle URL",
+      "acceptance_assertion": "Typing a query and pressing Enter or submitting opens the correct search results URL.",
       "human_or_target_site_required": false
     },
     {
@@ -407,7 +407,7 @@
       "scenario": "Pagination prev/next retains search/archive context",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Prev/next links behouden zoek- en taxonomiecontext",
+      "acceptance_assertion": "Previous and next links preserve the search and taxonomy context.",
       "human_or_target_site_required": false
     },
     {
@@ -416,7 +416,7 @@
       "scenario": "404 search recovery link",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "404-zoekveld werkt en leidt naar resultaten of leeg-resultaat",
+      "acceptance_assertion": "The 404 search field leads to matching results or the empty-results state.",
       "human_or_target_site_required": false
     },
     {
@@ -425,7 +425,7 @@
       "scenario": "Link targets and error states work",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Interne links 2xx/verwachte 404; mislukking zichtbaar, geen dead ends",
+      "acceptance_assertion": "Internal links return successful responses or expected 404s; failures are clear and provide a recovery path.",
       "human_or_target_site_required": true
     },
     {
@@ -434,7 +434,7 @@
       "scenario": "Document title and canonical owned by WP or SEO plugin",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "E\u00e9n title/canonical eigenaar; geen dubbel canoniek bij SEO-pluginprofiel",
+      "acceptance_assertion": "One component owns title and canonical metadata; the selected SEO plugin does not create duplicate canonicals.",
       "human_or_target_site_required": true
     },
     {
@@ -443,7 +443,7 @@
       "scenario": "Robots indexing and sitemap",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Robots/index intent en sitemap URLs correct, geen staging-indexatie",
+      "acceptance_assertion": "Robots directives, indexing intent and sitemap URLs are correct; staging is not indexed.",
       "human_or_target_site_required": true
     },
     {
@@ -452,7 +452,7 @@
       "scenario": "Yoast/RankMath optional integration no duplicates",
       "priority": "P2",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Yoast of Rank Math alleen op gekozen klantstack; nooit dubbele meta/JSON-LD",
+      "acceptance_assertion": "Test Yoast or Rank Math only when chosen for the target site; metadata and JSON-LD are not duplicated.",
       "human_or_target_site_required": true
     },
     {
@@ -461,7 +461,7 @@
       "scenario": "Semantic heading order on rendered routes",
       "priority": "P1",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "H1/H2 semantisch juist op home/page/post/archive/search/404/product",
+      "acceptance_assertion": "H1 and H2 semantics are correct on home, page, post, archive, search, 404 and product views.",
       "human_or_target_site_required": true
     },
     {
@@ -470,7 +470,7 @@
       "scenario": "LCP field/lab measurement",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "LCP <=2.5s p75 op mobiel/desktop of transparant geen velddata",
+      "acceptance_assertion": "Field LCP is at most 2.5 seconds at the mobile and desktop 75th percentile, or missing field data is disclosed.",
       "human_or_target_site_required": true
     },
     {
@@ -479,7 +479,7 @@
       "scenario": "CLS and responsive image sizing",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "CLS <=0.1 p75 en beeld-afmetingen/reserved space gecontroleerd",
+      "acceptance_assertion": "Field CLS is at most 0.1 at the 75th percentile; image dimensions and reserved space are checked.",
       "human_or_target_site_required": true
     },
     {
@@ -488,7 +488,7 @@
       "scenario": "INP responsiveness on menu",
       "priority": "P1",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "INP <=200ms p75 voor echte interacties; lab is afzonderlijk",
+      "acceptance_assertion": "Field INP is at most 200 milliseconds at the 75th percentile for real interactions; lab evidence is separate.",
       "human_or_target_site_required": true
     },
     {
@@ -497,7 +497,7 @@
       "scenario": "Cache/CDN asset behavior",
       "priority": "P2",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Assets/headers en private cart/account niet in gedeelde cache",
+      "acceptance_assertion": "Asset and cache headers are correct; private cart and account pages are not stored in shared caches.",
       "human_or_target_site_required": true
     },
     {
@@ -506,7 +506,7 @@
       "scenario": "Cold/warm cache comparison",
       "priority": "P2",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Warm/cold herhaalbaar gemeten op gekozen hosting; geen claims op lege starter",
+      "acceptance_assertion": "Cold and warm performance is measured reproducibly on the chosen hosting; no production claim is based on an empty starter.",
       "human_or_target_site_required": true
     },
     {
@@ -515,7 +515,7 @@
       "scenario": "WP debug log and browser network",
       "priority": "P0",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "Geen nieuwe kritieke WP/PHP fouten, 404 resources of console/network errors",
+      "acceptance_assertion": "Core flows produce no new critical WordPress/PHP errors, missing resources, or console/network failures.",
       "human_or_target_site_required": false
     },
     {
@@ -524,7 +524,7 @@
       "scenario": "WooCommerce absent: no errors on ordinary pages",
       "priority": "P1",
       "baseline_status": "SMOKE_PASS",
-      "acceptance_assertion": "Home/page/post/404/zoeken blijven normaal zonder Woo-plugin",
+      "acceptance_assertion": "Home, page, post, 404 and search routes work normally without WooCommerce.",
       "human_or_target_site_required": false
     },
     {
@@ -533,7 +533,7 @@
       "scenario": "WooCommerce activates and registers own templates",
       "priority": "P0",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "Woo eigen templates en Block Cart/Checkout aanwezig; geen overrideconflict",
+      "acceptance_assertion": "WooCommerce provides its own templates and Cart/Checkout Blocks without theme override conflicts.",
       "human_or_target_site_required": false
     },
     {
@@ -542,7 +542,7 @@
       "scenario": "Product catalog and category/tag",
       "priority": "P0",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "Winkel, productcategorie/-tag tonen producten met juiste inhoud en links",
+      "acceptance_assertion": "The shop, product categories and product tags display the correct products, content and links.",
       "human_or_target_site_required": false
     },
     {
@@ -551,7 +551,7 @@
       "scenario": "Simple product and image gallery",
       "priority": "P0",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "Productbeeld en galeriestate functioneel; prijs/voorraad en CTA correct",
+      "acceptance_assertion": "Product images and gallery states work; price, stock and purchase controls are correct.",
       "human_or_target_site_required": false
     },
     {
@@ -560,7 +560,7 @@
       "scenario": "Variable product and variations",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Variantkeuze, prijs, voorraad/invalid states en cart consistent",
+      "acceptance_assertion": "Variation selection, prices, stock, invalid states and cart contents stay consistent.",
       "human_or_target_site_required": false
     },
     {
@@ -569,7 +569,7 @@
       "scenario": "Inventory and sold-out states",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Op voorraad/uitverkocht/backorder instellingen en CTA-status juist",
+      "acceptance_assertion": "In-stock, out-of-stock and backorder settings produce the correct purchase-control states.",
       "human_or_target_site_required": false
     },
     {
@@ -578,7 +578,7 @@
       "scenario": "Add to cart/remove/update quantity",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Toevoegen, aantal wijzigen, verwijderen en cookiesessie echt bewezen",
+      "acceptance_assertion": "Adding items, changing quantities, removing items and retaining the cart session are verified in the runtime.",
       "human_or_target_site_required": false
     },
     {
@@ -587,7 +587,7 @@
       "scenario": "Empty cart and checkout page content",
       "priority": "P0",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "Lege cart, lege checkout, validatie- en empty states correct",
+      "acceptance_assertion": "Empty cart, empty checkout, validation and empty states render correctly.",
       "human_or_target_site_required": false
     },
     {
@@ -596,7 +596,7 @@
       "scenario": "Guest checkout sandbox order",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Gastorder volledig afronden; orderstatus/voorraad bevestigen; nooit echte betaling",
+      "acceptance_assertion": "A guest order completes with verified order status and stock changes; no real payment is taken.",
       "human_or_target_site_required": true
     },
     {
@@ -605,7 +605,7 @@
       "scenario": "Logged-in checkout sandbox order",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Klantorder na login inclusief bevestiging en status, privacy en voorraad",
+      "acceptance_assertion": "A signed-in customer order completes with confirmation, correct status, privacy and stock handling.",
       "human_or_target_site_required": true
     },
     {
@@ -614,7 +614,7 @@
       "scenario": "Account/login/reset password",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Login/logout/reset password zonder echte mail- of klantgegevens in publieke CI",
+      "acceptance_assertion": "Login, logout and password reset work without publishing real email or customer data in CI.",
       "human_or_target_site_required": true
     },
     {
@@ -623,7 +623,7 @@
       "scenario": "Tax/shipping/coupons/payment extension combinations",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Afgesproken tax/verzend/coupon/gateway-extensies werken in sandbox",
+      "acceptance_assertion": "The selected tax, shipping, coupon and payment extensions work in their approved test environment.",
       "human_or_target_site_required": true
     },
     {
@@ -632,7 +632,7 @@
       "scenario": "Dynamic checkout excluded from public caching",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Gast A ziet nooit cart/customergegevens van gast B; checkout ongecached",
+      "acceptance_assertion": "Guest A never sees guest B's cart or customer data; checkout is not publicly cached.",
       "human_or_target_site_required": true
     },
     {
@@ -641,7 +641,7 @@
       "scenario": "Mobile checkout and form errors",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "Mobile checkout/invalid velden/focus/errortekst en toetsenbord functioneel",
+      "acceptance_assertion": "Mobile checkout, invalid fields, focus, error text and keyboard interactions work correctly.",
       "human_or_target_site_required": true
     },
     {
@@ -650,7 +650,7 @@
       "scenario": "Install exact release ZIP in clean WordPress",
       "priority": "P0",
       "baseline_status": "SMOKE_PASS",
-      "acceptance_assertion": "Exacte SHA-theme-ZIP op lege WP; juiste slug, versie en alle file hashes",
+      "acceptance_assertion": "The exact hashed theme ZIP installs on clean WordPress with the correct slug, version and file hashes.",
       "human_or_target_site_required": false
     },
     {
@@ -659,7 +659,7 @@
       "scenario": "Activate with WP_DEBUG enabled",
       "priority": "P0",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "Debug aan, herlaad routes, geen PHP-fatal/notice gerelateerd aan theme",
+      "acceptance_assertion": "With debugging enabled, reloaded routes produce no theme-related PHP fatal errors or notices.",
       "human_or_target_site_required": false
     },
     {
@@ -668,7 +668,7 @@
       "scenario": "Confirm no missing Core assets and no PHP errors",
       "priority": "P0",
       "baseline_status": "PARTIAL",
-      "acceptance_assertion": "Geen kritieke PHP-errors, 404 scripts/assets, JS pageerrors bij kernflows",
+      "acceptance_assertion": "Core flows produce no critical PHP errors, missing scripts/assets or uncaught JavaScript page errors.",
       "human_or_target_site_required": false
     },
     {
@@ -677,7 +677,7 @@
       "scenario": "Test declared WP 6.6 minimum + current supported core",
       "priority": "P0",
       "baseline_status": "SMOKE_PASS",
-      "acceptance_assertion": "Min WP 6.6/PHP 8.3 plus huidig WP/PHP 8.3 en 8.4 ondersteund bewezen",
+      "acceptance_assertion": "The declared WordPress 6.6/PHP 8.3 minimum and current WordPress on PHP 8.3 and 8.4 are verified.",
       "human_or_target_site_required": false
     },
     {
@@ -686,7 +686,7 @@
       "scenario": "Restore backup rollback after failed activation",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "DB + uploads veilig herstellen na themaswitch/fout; geverifieerde URL/content",
+      "acceptance_assertion": "Database and uploads restore safely after a theme change or failure; URLs and content are verified.",
       "human_or_target_site_required": true
     },
     {
@@ -695,7 +695,7 @@
       "scenario": "Owner/QA approval after staging and independent rerun",
       "priority": "P0",
       "baseline_status": "NOT_RUN",
-      "acceptance_assertion": "TH-01..16 evidence, risicolog, teamreview, exact ZIP/hash en signoff",
+      "acceptance_assertion": "TH-01 through TH-16 evidence, risk records, team review, exact ZIP/hash and owner signoff are present.",
       "human_or_target_site_required": true
     }
   ]

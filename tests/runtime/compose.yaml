@@ -47,6 +47,7 @@ services:
       - wordpress-data:/var/www/html
       - ../../dist:/workspace/dist:ro
       - ./seed_woo.php:/workspace/seed_woo.php:ro
+      - ./acf_smoke.php:/workspace/acf_smoke.php:ro
 volumes:
   db-data: {}
   wordpress-data: {}

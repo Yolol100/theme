@@ -403,9 +403,10 @@ class ThemeTests(unittest.TestCase):
                      'docs/staging-acceptance.example.json',
                      'scripts/validate_staging_acceptance.py','tests/test_staging_acceptance.py',
                      'tests/runtime/woo_store_api.py','tests/runtime/admin_smoke.py',
-                     'tests/runtime/rollback.sh','tests/runtime/axe_audit.py'} |
-                    {'optional-scaffolding/assets/','optional-scaffolding/patterns/',
-                     'optional-scaffolding/styles/'})
+                     'tests/runtime/rollback.sh','tests/runtime/axe_audit.py',
+                     'docs/ARCHITECTURE.md','tests/runtime/acf_smoke.php',
+                     'tests/runtime/acf_smoke.sh','tests/test_acf_contract.py'})
+                self.assertFalse(any(name.endswith('/') for name in archive.namelist()))
                 for info in archive.infolist():
                     if info.filename.startswith('theme/'):
                         self.assertEqual(archive.read(info.filename),(root/info.filename).read_bytes())

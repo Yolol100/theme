@@ -104,3 +104,18 @@ real hosting rollback, and third-party sandbox checkout require their own
 independent site/reviewer receipt; see `STAGING-ACCEPTANCE.md`. No pass claim is
 made until the latest run is complete and independently read back. If a new
 runtime test fails, the CI is a valid regression finding and must not be skipped.
+
+## Structure, English documentation and optional ACF review
+
+The 12 installation files retain their existing names and contents. WordPress
+block delimiters and license text are unchanged. Comments now describe the
+actual test scope; the 77 scenario assertions are in English without changing
+their IDs or historical statuses. Source archives no longer contain unused
+empty scaffold directories.
+
+See `ARCHITECTURE.md` for the naming and ownership review. The existing runtime
+workflow now runs `acf_smoke.sh` after its original no-ACF checks. Its separate
+`acf-audit.json` records the exact plugin/runtime versions, archive hash and
+results for per-page fields, bindings, restrictions and disable/reactivate
+behavior. Only a completed passing run proves those checks. ACF PRO, manual
+field creation and all-client-stack compatibility remain outside that proof.

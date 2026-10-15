@@ -1,8 +1,7 @@
-"""Fail-closed review of a *human supplied* staging acceptance receipt.
+"""Validate staging receipt fields and the installation archive's hash.
 
-This validator checks provenance fields, consistency and the exact ZIP hash. It
-CANNOT authenticate a screenshot, reviewer, payment, assistive-tech session, or
-hosting restore. A validated packet is never a standalone production GO.
+This checks the record, not the truth of human observations or provider results.
+A valid receipt still requires independent release approval.
 """
 import argparse
 import hashlib

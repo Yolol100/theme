@@ -1,8 +1,8 @@
-"""Authenticated browser check for WordPress admin and block-editor loading.
+"""Check authenticated editor, block persistence and template-part restoration.
 
-The fixture page is created by WP-CLI. A gated, actual Gutenberg data-store
-roundtrip is executed on current WordPress in one isolated profile; Site Editor
-menus/global styles still require separate human acceptance.
+The PHP 8.3 profiles without WooCommerce exercise Gutenberg's data store on
+minimum and current WordPress. The current profile also checks template-part
+REST writes. These checks do not cover manual Site Editor or screen-reader use.
 """
 import os
 from playwright.sync_api import sync_playwright
@@ -53,15 +53,13 @@ def test_editor_role_post(browser):
 
 
 def test_editor_edge_cases(page):
-    # Additional Gutenberg fixtures use the browser-loaded data store.
-    # This is programmatic block recovery, not the UI recovery button.
+    # Recover the fixture through the editor store, not the UI recovery button.
     empty_id = os.environ.get('EDITOR_EMPTY_PAGE_ID')
     invalid_id = os.environ.get('EDITOR_INVALID_PAGE_ID')
     assert empty_id and empty_id.isdigit() and invalid_id and invalid_id.isdigit()
     response=page.goto(BASE+'/ci-empty-page/', wait_until='domcontentloaded')
     assert response and response.status==200
-    # WordPress can omit the post-content wrapper entirely for a truly empty page.
-    # Check rendered semantics, not an incidental empty Core wrapper.
+    # Core omits the post-content wrapper when the page has no content.
     assert ' '.join(page.locator('main').inner_text().split()) == 'CI Empty Page', (
         'Empty WordPress page rendered unexpected content: ' + page.locator('main').inner_text()
     )
@@ -80,9 +78,8 @@ def test_editor_edge_cases(page):
     assert any(b['name']=='core/heading' and b['valid'] is False for b in before), (
         f'Invalid serialized Core heading was not detected by Gutenberg: {before}'
     )
-    # Replace the invalid Core block and allow the editor store to observe it
-    # before issuing Save. Calling savePost in the same JS tick as replaceBlocks
-    # can capture the old invalid serialization on some WordPress versions.
+    # Wait for the replacement to reach the store before saving; saving in the
+    # same tick can persist the old, invalid markup.
     recovered=page.evaluate('''() => {
         const editor=wp.data.select('core/block-editor');
         const bad=editor.getBlocks().find(b=>b.name==='core/heading'
@@ -106,8 +103,7 @@ def test_editor_edge_cases(page):
         const editor=wp.data.select('core/editor');
         return !editor.isSavingPost() && !editor.isEditedPostDirty();
     }''', timeout=45000)
-    # Reopen the editor in a new navigation; require the recovered Core block
-    # to be parsed as valid again, not just visible in the previous store.
+    # Reload from the server to check that the saved block is still valid.
     page.reload(wait_until='domcontentloaded')
     page.wait_for_function('''() => Boolean(window.wp && wp.data &&
         wp.data.select('core/editor')?.getCurrentPostId() &&
@@ -129,8 +125,8 @@ def test_editor_edge_cases(page):
 
 
 def test_site_editor_api_roundtrip(page):
-    # Real authenticated REST calls from the loaded Site Editor, NOT a visual
-    # Site Editor edit. No file changes or persistent theme modifications.
+    # Use the authenticated REST API; this is NOT a visual Site Editor test.
+    # Restore the temporary database overrides without changing theme files.
     page.goto(BASE+'/wp-admin/site-editor.php',wait_until='domcontentloaded')
     page.wait_for_function("() => Boolean(window.wp && wp.apiFetch && wp.data)",timeout=45000)
     parts=page.evaluate('''async () => {
@@ -208,9 +204,8 @@ def main():
             # The Site Editor shell should render without a PHP/React fatal error.
             assert page.locator('body').inner_text().strip(), 'Empty block editor response'
             assert not page.locator('body').get_by_text('critical error', exact=False).count(), 'Critical error in admin'
-            # A real authenticated browser visit, not a REST-only Site Editor check.
-            # Saving site-wide parts/navigation/global styles is reserved for the
-            # separate isolated staging and human acceptance workflow.
+            # Check the Site Editor shell here. The separate REST test covers
+            # template parts; navigation and Global Styles still need UI tests.
             site_editor = page.goto(BASE + '/wp-admin/site-editor.php', wait_until='domcontentloaded')
             assert site_editor and site_editor.status == 200, 'Admin cannot open Site Editor'
             # Site Editor is a React application: DOMContentLoaded may precede
@@ -259,8 +254,7 @@ def main():
                             window.wp.blocks.createBlock('core/button', {text: 'CI Core Button', url: '/'})
                         ]),
                         window.wp.blocks.createBlock('core/table', {
-                            // The nested cell shape is parsed from saved markup.
-                            // Explicit tag is required by core/table's save.js.
+                            // Core's table serializer requires a tag for each cell.
                             body: [{cells: [
                                 {tag: 'td', content: 'CI Table First'},
                                 {tag: 'td', content: 'CI Table Second'}
@@ -302,8 +296,7 @@ def main():
                     assert marker in body, f'Missing persisted Gutenberg Core block content: {marker}'
                 assert page.locator('main .wp-block-columns .wp-block-column').count() == 2
                 assert page.locator('main .wp-block-buttons a[href="/"]').count() == 1
-                # Core may create additional empty default cells. The contract
-                # is semantic table markup and preservation of both authored cells.
+                # Check table semantics and authored cell content after reload.
                 table = page.locator('main .wp-block-table table').first
                 assert table.count() == 1, 'Saved Core table is not rendered as a table'
                 assert table.locator('th, td').count() >= 2, (

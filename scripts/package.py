@@ -1,7 +1,6 @@
-"""Deterministic, allow-listed distribution of the 12-file WordPress starter.
+"""Build reproducible theme and source archives from explicit file lists.
 
-Development-only files and secrets are never discovered through a wildcard scan.
-Unexpected theme files or symlinks abort the release rather than silently ship.
+Reject unexpected theme files and symlinks before writing either archive.
 """
 from pathlib import Path, PurePosixPath
 from tempfile import NamedTemporaryFile
@@ -35,8 +34,9 @@ SOURCE_FILES = frozenset({
     'tests/runtime/rollback.sh',
     'tests/runtime/compose.yaml', 'tests/runtime/run.sh',
     'tests/runtime/browser_smoke.py', 'tests/runtime/seed_woo.php',
+    'docs/ARCHITECTURE.md', 'tests/runtime/acf_smoke.php',
+    'tests/runtime/acf_smoke.sh', 'tests/test_acf_contract.py',
 })
-OPTIONAL_SCAFFOLD = ('assets', 'patterns', 'styles')
 
 
 def file_bytes(base: Path, name: str) -> bytes:
@@ -109,7 +109,6 @@ def main() -> None:
     theme_map = {'webactueel-starter/' + name: file_bytes(THEME, name) for name in RUNTIME_FILES}
     source_map = {'theme/webactueel-starter/' + name: file_bytes(THEME, name) for name in RUNTIME_FILES}
     source_map.update({name: file_bytes(ROOT, name) for name in SOURCE_FILES})
-    source_map.update({f'optional-scaffolding/{name}/': b'' for name in OPTIONAL_SCAFFOLD})
     theme_sha = build_zip(THEME_ZIP, theme_map)
     source_sha = build_zip(SOURCE_ZIP, source_map)
     (DIST / 'SHA256SUMS.txt').write_text(
