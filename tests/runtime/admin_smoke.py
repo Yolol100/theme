@@ -165,9 +165,19 @@ def test_site_editor_api_roundtrip(page):
             page.wait_for_function("() => Boolean(window.wp && wp.apiFetch)",timeout=45000)
             restored=page.evaluate('''async (id) => {
                 const path='/wp/v2/template-parts/'+encodeURIComponent(id);
-                const response=await wp.apiFetch({path:path+'?force=true',method:'DELETE'});
-                const baseline=await wp.apiFetch({path:path+'?context=edit'});
-                return {deleted:Boolean(response.deleted), source:baseline.source, content:baseline.content?.raw};
+                const describe=e=>({code:e?.code??null,message:e?.message??String(e),
+                    status:e?.data?.status??null});
+                let response, baseline, deletionError=null, baselineError=null;
+                try {
+                    response=await wp.apiFetch({path:path+'?force=true',method:'DELETE'});
+                } catch(e) { deletionError=describe(e); }
+                // Query the bundled theme file explicitly after deleting its
+                // transient DB override. A missing fallback is still a FAIL.
+                try {
+                    baseline=await wp.apiFetch({path:path+'?context=edit&source=theme'});
+                } catch(e) { baselineError=describe(e); }
+                return {deleted:Boolean(response?.deleted), deletionError, baselineError,
+                    source:baseline?.source, content:baseline?.content?.raw};
             }''',part['id'])
             assert restored['deleted'] and restored['content']==part['original'], (
                 f'Failed to restore original {part["slug"]} theme part: {restored}'
