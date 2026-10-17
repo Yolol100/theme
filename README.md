@@ -2,6 +2,22 @@
 
 Minimal native **WordPress block theme** for *new* sites; **not** a drop-in upgrade for Webactueel Universal. The installable theme has 12 files: six templates, three template parts, `theme.json`, stylesheet metadata and GPL license. No PHP/JS, ACF dependency, page builder or custom WooCommerce checkout code.
 
+## Why this project exists
+
+A new WordPress site should be able to start with native blocks and a small, reviewable theme rather than inherit a large page-builder or plugin stack. This starter keeps layout structure inside Gutenberg while making compatibility, packaging and staging decisions explicit.
+
+## What to review
+
+| Engineering decision | Inspect |
+| --- | --- |
+| Native block templates and design tokens | [Theme architecture](docs/ARCHITECTURE.md) and the installable theme source |
+| Repeatable packaging and validation | [Source workflow](.github/workflows/ci.yml), [runtime matrix](.github/workflows/wordpress-runtime.yml) and [tests](tests/) |
+| Release limits and human checks | [QA contract](docs/QA.md) and [staging acceptance](docs/STAGING-ACCEPTANCE.md) |
+
+**Evidence boundary:** This is a reproducible starter and testing example—not a public client website, a visual design case study or a production-ready upgrade for an existing theme.
+
+## Compatibility and setup
+
 - WordPress 6.6+ and PHP 8.3+ per theme header; verify the chosen target versions.
 - Core/Gutenberg owns pages and layout. ACF is optional structured data; field groups must be created deliberately. WooCommerce owns products, cart and checkout.
 - [Architecture](docs/ARCHITECTURE.md) · [QA](docs/QA.md) · [staging/GO decision](docs/STAGING-ACCEPTANCE.md) · [77 scenarios](docs/77-scenarios.json).
