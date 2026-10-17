@@ -2,6 +2,14 @@
 
 Minimal native **WordPress block theme** for *new* sites; **not** a drop-in upgrade for Webactueel Universal. The installable theme has 12 files: six templates, three template parts, `theme.json`, stylesheet metadata and GPL license. No PHP/JS, ACF dependency, page builder or custom WooCommerce checkout code.
 
+## Who this starter is for
+
+**For agencies:** start a new WordPress site from a small, understandable Gutenberg theme instead of inheriting a complex page-builder dependency. **For developers:** inspect how templates, template parts and design tokens fit together, then run the packaging and compatibility checks below.
+
+This repository is **source code for a starter**, not a finished client site or a visual design demo. For examples of real responsive client-facing work, see my [published website case studies](https://andrewbaeten.nl/category/cases/). Those websites are **not claimed to run this starter**.
+
+**A quick code-review path:** [block templates](theme/webactueel-starter/templates/) → [theme.json design tokens](theme/webactueel-starter/theme.json) → [runtime QA](.github/workflows/wordpress-runtime.yml).
+
 ## Why this project exists
 
 A new WordPress site should be able to start with native blocks and a small, reviewable theme rather than inherit a large page-builder or plugin stack. This starter keeps layout structure inside Gutenberg while making compatibility, packaging and staging decisions explicit.
