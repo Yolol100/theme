@@ -6,6 +6,16 @@ Minimal native **WordPress block theme** for *new* sites; **not** a drop-in upgr
 
 A new WordPress site should be able to start with native blocks and a small, reviewable theme rather than inherit a large page-builder or plugin stack. This starter keeps layout structure inside Gutenberg while making compatibility, packaging and staging decisions explicit.
 
+## What this starter demonstrates
+
+**For website owners:** a lean WordPress foundation with editable native blocks instead of a compulsory page builder.
+
+**For reviewers:** theme templates, reusable layout parts and design tokens that can be inspected independently from the test and package pipeline.
+
+**Try it safely:** run the [build and verification commands](#verify-and-package), install the generated theme ZIP on a **new staging WordPress site**, and inspect the editor, responsive templates and navigation before creating any client-specific variation. This repository is a starter, **not** a copy of an existing Webactueel client design.
+
+**Looking for actual design work?** See [Spring Architecten](https://andrewbaeten.nl/spring-architecten/), [RBMB](https://andrewbaeten.nl/rbmb/) and [more independent website case studies](https://andrewbaeten.nl/category/cases/). Those projects demonstrate design delivery; they are **not** presented as sites built with this exact starter.
+
 ## What to review
 
 | Engineering decision | Inspect |
