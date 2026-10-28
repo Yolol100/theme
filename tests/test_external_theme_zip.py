@@ -19,7 +19,7 @@ class ThemeZipAdmissionTests(unittest.TestCase):
 
     def archive(self, names=None):
         names = names if names is not None else {
-            "sample/style.css": "/* Theme Name: Sample */",
+            "sample/style.css": "/*\nTheme Name: Sample\n*/",
             "sample/theme.json": "{}", "sample/templates/index.html": "<h1>Welcome</h1>"}
         with zipfile.ZipFile(self.path, "w", compression=zipfile.ZIP_DEFLATED) as z:
             for name, value in names.items():
@@ -33,8 +33,20 @@ class ThemeZipAdmissionTests(unittest.TestCase):
         self.assertFalse(r["production_approved"])
 
     def test_classic_theme_passes(self):
-        sha = self.archive({"sample/style.css": "theme", "sample/index.php": "<?php ?>"})
+        sha = self.archive({"sample/style.css": "/*\nTheme Name: Sample\n*/", "sample/index.php": "<?php ?>"})
         self.assertEqual(inspect(self.path, sha, "sample")["theme_type"], "classic")
+
+    def test_malformed_theme_header_is_rejected_before_runtime(self):
+        sha = self.archive({"sample/style.css": "Not a WordPress header",
+                            "sample/index.php": "<?php ?>"})
+        with self.assertRaisesRegex(ValueError, "Theme Name header"):
+            inspect(self.path, sha, "sample")
+
+    def test_case_sensitive_theme_paths_are_required(self):
+        sha = self.archive({"sample/STYLE.CSS": "/*\nTheme Name: Sample\n*/",
+                            "sample/index.php": "<?php ?>"})
+        with self.assertRaisesRegex(ValueError, "exact-case"):
+            inspect(self.path, sha, "sample")
 
     def test_wrong_sha_fails_closed(self):
         self.archive()
