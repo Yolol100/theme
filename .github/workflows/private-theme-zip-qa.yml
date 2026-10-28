@@ -1,0 +1,103 @@
+name: Private theme ZIP QA
+on:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      artifact_name:
+        type: string
+        required: true
+      archive_name:
+        type: string
+        required: true
+      zip_sha256:
+        type: string
+        required: true
+      theme_slug:
+        type: string
+        required: true
+      harness_sha:
+        type: string
+        required: true
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: harness
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+        with:
+          repository: Yolol100/theme
+          ref: ${{ inputs.harness_sha || github.event.pull_request.head.sha || github.sha }}
+          path: harness
+          persist-credentials: false
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+        with:
+          python-version: '3.12'
+      - name: Check origin
+        env:
+          PROVIDED: ${{ inputs.harness_sha }}
+          NAME: ${{ inputs.artifact_name }}
+          PRIVATE: ${{ github.event.repository.private }}
+          CURRENT: ${{ github.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          sha="$(git rev-parse HEAD)"
+          if [ -n "$NAME" ]; then
+            [ "$PRIVATE" = true ] && [ "$sha" = "$PROVIDED" ] || exit 1
+          else
+            [ "$sha" = "$CURRENT" ] || [ "$sha" = "$PR_HEAD" ] || exit 1
+          fi
+      - name: Build public fixture only
+        if: inputs.artifact_name == ''
+        run: |
+          python3 scripts/package.py
+          (cd dist && sha256sum --check SHA256SUMS.txt)
+          cp dist/Webactueel-Block-Starter-1.0.5-STAGING.zip dist/external-theme.zip
+      - name: Obtain private caller artifact
+        if: inputs.artifact_name != ''
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: harness/dist
+      - name: Validate package and run disposable WordPress QA
+        env:
+          INPUT_NAME: ${{ inputs.archive_name }}
+          INPUT_SHA: ${{ inputs.zip_sha256 }}
+          INPUT_SLUG: ${{ inputs.theme_slug }}
+          ARTIFACT_NAME: ${{ inputs.artifact_name }}
+          QA_SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          QA_HARNESS_SHA="$(git rev-parse HEAD)"
+          if [ -n "$ARTIFACT_NAME" ]; then
+            QA_ZIP_FILENAME="$INPUT_NAME"; QA_ZIP_SHA256="$INPUT_SHA"; QA_THEME_SLUG="$INPUT_SLUG"
+          else
+            QA_ZIP_FILENAME=external-theme.zip
+            QA_ZIP_SHA256="$(sha256sum dist/external-theme.zip | cut -d' ' -f1)"
+            QA_THEME_SLUG=webactueel-starter
+            # A public PR checkout uses head.sha, not GitHub's synthetic merge SHA.
+            QA_SOURCE_SHA="$QA_HARNESS_SHA"
+          fi
+          [[ "$QA_ZIP_FILENAME" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*[.]zip$ ]] && [[ "$QA_ZIP_FILENAME" != *..* ]] || exit 1
+          python3 -m pip install playwright==1.56.0
+          python3 -m playwright install --with-deps chromium firefox webkit
+          npm install --no-save --ignore-scripts --package-lock=false axe-core@4.14.0
+          export QA_ZIP_FILENAME QA_ZIP_SHA256 QA_THEME_SLUG QA_HARNESS_SHA QA_SOURCE_SHA
+          export WP_TARGET=latest PHP_VERSION=8.3 ENABLE_WOO=0 ENABLE_ACF=0
+          bash tests/runtime/external_zip_run.sh
+      - name: Save sanitized receipts
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        with:
+          name: external-theme-qa-${{ github.run_id }}-${{ github.run_attempt }}
+          path: harness/reports/external-*.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Dispose isolated environment
+        if: always()
+        run: docker compose -f tests/runtime/compose.yaml down -v --remove-orphans
