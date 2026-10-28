@@ -24,7 +24,7 @@ def inspect(path: Path, expected_sha256: str, expected_slug: str) -> dict:
         actual = hashlib.file_digest(source, "sha256").hexdigest()
     if actual != expected_sha256:
         raise ValueError("Exact ZIP SHA-256 does not match approval")
-    unpacked, names = 0, set()
+    unpacked, names, exact_names = 0, set(), set()
     with zipfile.ZipFile(path) as archive:
         entries = archive.infolist()
         if not entries or len(entries) > MAX_ENTRIES:
@@ -41,6 +41,7 @@ def inspect(path: Path, expected_sha256: str, expected_slug: str) -> dict:
             if normalized in names:
                 raise ValueError("Duplicate case-insensitive archive path")
             names.add(normalized)
+            exact_names.add(name.rstrip("/"))
             mode = (entry.external_attr >> 16) & 0xFFFF
             filetype = stat.S_IFMT(mode)
             if filetype not in (0, stat.S_IFREG, stat.S_IFDIR):
@@ -54,12 +55,17 @@ def inspect(path: Path, expected_sha256: str, expected_slug: str) -> dict:
                 raise ValueError("Suspicious archive compression ratio")
         if archive.testzip() is not None:
             raise ValueError("Archive CRC failed")
-    stylesheet = f"{expected_slug}/style.css".casefold()
-    classic = f"{expected_slug}/index.php".casefold() in names
-    block = all(f"{expected_slug}/{p}".casefold() in names
-                for p in ("theme.json", "templates/index.html"))
-    if stylesheet not in names or not (classic or block):
-        raise ValueError("Missing WordPress theme header or classic/block entrypoint")
+        stylesheet = f"{expected_slug}/style.css"
+        classic = f"{expected_slug}/index.php" in exact_names
+        block = all(f"{expected_slug}/{p}" in exact_names
+                    for p in ("theme.json", "templates/index.html"))
+        if stylesheet not in exact_names or not (classic or block):
+            raise ValueError("Missing exact-case WordPress style.css or classic/block entrypoint")
+        # WordPress reads the theme stylesheet header, not just its filename.
+        # The first 8 KiB is WordPress' normal file-header detection range.
+        header = archive.read(stylesheet)[:8192].decode("utf-8", "replace")
+        if not re.search(r"(?m)^[ \t]*(?:\*[ \t]*)?Theme Name:[ \t]*\S", header):
+            raise ValueError("WordPress style.css missing Theme Name header")
     return {"status": "PASS", "scope": "archive-validation-only", "theme_slug": expected_slug,
             "theme_type": "block" if block else "classic", "zip_sha256": actual,
             "entry_count": len(entries), "unpacked_bytes": unpacked,
