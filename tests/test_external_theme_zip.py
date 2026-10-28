@@ -109,5 +109,46 @@ class ThemeZipAdmissionTests(unittest.TestCase):
             inspect(self.path, sha, "sample")
 
 
+class RuntimeEvidenceContractTests(unittest.TestCase):
+    def test_public_fixture_source_is_actual_checkout(self):
+        workflow = (Path(__file__).resolve().parents[1] /
+                    ".github/workflows/private-theme-zip-qa.yml").read_text()
+        self.assertIn("QA_SOURCE_SHA: " + "$" + "{{ github.sha }}", workflow)
+        self.assertIn('QA_SOURCE_SHA="$QA_HARNESS_SHA"', workflow)
+        self.assertIn("github.event.repository.private", workflow)
+
+    def test_optional_plugins_are_activation_only_not_checkout_or_field_proof(self):
+        import json
+        import os
+        import subprocess
+
+        root = Path(__file__).resolve().parents[1]
+        shell = (root / "tests/runtime/external_zip_run.sh").read_text()
+        receipt_code = shell.split("python3 - <<'PY'\n", 1)[1].split("\nPY\n", 1)[0]
+        with tempfile.TemporaryDirectory() as tmp:
+            for woo, acf in (("0", "0"), ("1", "1")):
+                environment = {
+                    **os.environ, "QA_SOURCE_SHA": "a" * 40,
+                    "QA_HARNESS_SHA": "b" * 40, "QA_ZIP_SHA256": "c" * 64,
+                    "QA_THEME_SLUG": "sample", "QA_ACTUAL_WP": "7.1.3",
+                    "QA_ACTUAL_PHP": "8.3.36", "ENABLE_WOO": woo,
+                    "ENABLE_ACF": acf,
+                }
+                (Path(tmp) / "reports").mkdir(exist_ok=True)
+                run = subprocess.run(
+                    [sys.executable, "-c", receipt_code], cwd=tmp,
+                    env=environment, capture_output=True, text=True)
+                self.assertEqual(run.returncode, 0, run.stderr)
+                receipt = json.loads(
+                    (Path(tmp) / "reports/external-runtime.json").read_text())
+                expected = "PASS" if woo == "1" else "NOT_RUN"
+                self.assertEqual(receipt["woocommerce_plugin_activation"], expected)
+                self.assertEqual(receipt["acf_free_plugin_activation"], expected)
+                self.assertEqual(receipt["woocommerce_checkout"], "NOT_RUN")
+                self.assertEqual(receipt["acf_field_roundtrip"], "NOT_RUN")
+                self.assertEqual(receipt["gutenberg_editor_ui"], "NOT_RUN")
+                self.assertFalse(receipt["production_approved"])
+
+
 if __name__ == "__main__":
     unittest.main()
