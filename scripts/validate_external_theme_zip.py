@@ -30,7 +30,7 @@ def inspect(path: Path, expected_sha256: str, expected_slug: str) -> dict:
         if not entries or len(entries) > MAX_ENTRIES:
             raise ValueError("Invalid archive entry count")
         for entry in entries:
-            name = entry.filename
+            name = entry.orig_filename
             components = PurePosixPath(name).parts
             if (not name or name.startswith("/") or "\\" in name or
                 any(c in ("", ".", "..") for c in name.rstrip("/").split("/")) or
