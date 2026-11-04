@@ -98,7 +98,14 @@ class ThemeZipAdmissionTests(unittest.TestCase):
             inspect(self.path, sha, "sample")
 
     def test_backslash_path_fails(self):
-        sha = self.archive({"sample\\style.css": "x", "sample/index.php": "ok"})
+        self.archive({"sample/style.css": "x", "sample/index.php": "ok"})
+        # ZipInfo normalizes backslashes on Windows when writing ZIPs.
+        # Replace the filename in the raw ZIP to exercise untrusted input.
+        payload = self.path.read_bytes().replace(
+            b"sample/style.css", b"sample\\style.css"
+        )
+        self.path.write_bytes(payload)
+        sha = hashlib.sha256(payload).hexdigest()
         with self.assertRaisesRegex(ValueError, "Unsafe"):
             inspect(self.path, sha, "sample")
 
